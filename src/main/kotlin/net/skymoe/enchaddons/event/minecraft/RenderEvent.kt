@@ -2,6 +2,7 @@ package net.skymoe.enchaddons.event.minecraft
 
 import net.minecraft.block.state.IBlockState
 import net.minecraft.client.gui.GuiScreen
+import net.minecraft.client.renderer.RenderGlobal
 import net.minecraft.tileentity.TileEntity
 import net.minecraft.world.IBlockAccess
 import net.skymoe.enchaddons.event.Event
@@ -9,6 +10,13 @@ import net.skymoe.enchaddons.util.asBlockPos
 import net.skymoe.enchaddons.util.math.Vec3I
 
 sealed interface RenderEvent : Event {
+    sealed interface World : RenderEvent {
+        data class Last(
+            val context: RenderGlobal,
+            val partialTicks: Float,
+        ) : World
+    }
+
     sealed interface Render : RenderEvent {
         data object Pre : Render
     }

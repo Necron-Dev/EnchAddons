@@ -1,8 +1,23 @@
 package net.skymoe.enchaddons.util
 
 import net.skymoe.enchaddons.util.math.int
+import java.awt.Color
 import kotlin.math.abs
 import kotlin.math.min
+
+fun Color.withAlpha(alpha: Int) = Color(this.red, this.green, this.blue, alpha)
+
+fun Color.withAlpha(alpha: Float) = Color(this.red, this.green, this.blue, (alpha * 255).toInt())
+
+fun Color.invisible() = withAlpha(0)
+
+operator fun Color.component1() = this.red
+
+operator fun Color.component2() = this.green
+
+operator fun Color.component3() = this.blue
+
+operator fun Color.component4() = this.alpha
 
 fun convertRGBToHSL(vararg rgb: Double): DoubleArray {
     val hsl = DoubleArray(if (rgb.size >= 4) 4 else 3)
@@ -57,14 +72,13 @@ fun convertHSLToRGB(vararg hsl: Double): DoubleArray {
     }.normalizeColor
 }
 
-fun convertARGBToDoubleArray(argb: Int): DoubleArray {
-    return doubleArrayOf(
+fun convertARGBToDoubleArray(argb: Int): DoubleArray =
+    doubleArrayOf(
         (argb ushr 16 and 0xFF) / 255.0,
         (argb ushr 8 and 0xFF) / 255.0,
         (argb and 0xFF) / 255.0,
         (argb ushr 24 and 0xFF) / 255.0,
     ).normalizeColor
-}
 
 fun convertRGBToDoubleArray(argb: Int) = convertARGBToDoubleArray(argb or 0xFF000000.int)
 
@@ -97,8 +111,7 @@ infix fun DoubleArray.blendColor(rgbaSrc: DoubleArray): DoubleArray {
     ).normalizeColor
 }
 
-infix fun Int.blendColor(argbSrc: Int): Int {
-    return convertDoubleArrayToARGB(
+infix fun Int.blendColor(argbSrc: Int): Int =
+    convertDoubleArrayToARGB(
         *convertARGBToDoubleArray(this) blendColor convertARGBToDoubleArray(argbSrc),
     )
-}

@@ -11,7 +11,6 @@ import net.minecraft.item.Item
 import net.minecraft.scoreboard.ScoreObjective
 import net.minecraft.scoreboard.ScorePlayerTeam
 import net.minecraft.util.BlockPos
-import net.minecraft.util.ChatComponentText
 import net.minecraft.util.IChatComponent
 import net.minecraft.util.ResourceLocation
 import net.minecraft.util.Vec3i
@@ -73,16 +72,14 @@ fun WorldRenderer.tex(vec: Vec2D): WorldRenderer = tex(vec.x, vec.y)
 fun WorldRenderer.color(color: Color): WorldRenderer = color(color.r.float, color.g.float, color.b.float, color.a.float)
 
 fun printChat(message: IChatComponent) {
+    logger.info("[PRINT CHAT] $message")
     MC.theWorld?.let {
         MC.ingameGUI.chatGUI.printChatMessage(message)
     }
 }
 
 fun printChat(message: String = "") {
-    logger.info("[PRINT CHAT] $message")
-    MC.theWorld?.let {
-        MC.ingameGUI.chatGUI.printChatMessage(ChatComponentText(message))
-    }
+    printChat(message.asComponent())
 }
 
 fun printChat(throwable: Throwable) = printChat(throwable.stackTraceMessage)

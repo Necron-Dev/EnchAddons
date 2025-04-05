@@ -3,6 +3,7 @@ package net.skymoe.enchaddons.impl
 import net.skymoe.enchaddons.EnchAddons
 import net.skymoe.enchaddons.event.minecraft.MinecraftEvent
 import net.skymoe.enchaddons.event.register
+import net.skymoe.enchaddons.feature.awesomemap.AwesomeMap
 import net.skymoe.enchaddons.feature.config.FeatureConfig
 import net.skymoe.enchaddons.feature.dungeon.fastdraft.FastDraft
 import net.skymoe.enchaddons.feature.dynamickeybind.DynamicKeyBinding
@@ -71,6 +72,8 @@ class EnchAddonsImpl : EnchAddons {
         TeamSpeakConnectHUD
 
         FastDraft
+
+        AwesomeMap
 
         eventDispatcher.register<MinecraftEvent.Load.Post> {
             loadHypixelModAPI

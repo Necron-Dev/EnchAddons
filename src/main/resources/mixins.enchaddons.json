@@ -17,6 +17,8 @@
   "verbose": true,
   "mixins": [
     "BasicOptionMixin",
+    "EntityLivingBaseMixin",
+    "ForgeHooksClientMixin",
     "NetHandlerPlayClientMixin"
   ]
 }
