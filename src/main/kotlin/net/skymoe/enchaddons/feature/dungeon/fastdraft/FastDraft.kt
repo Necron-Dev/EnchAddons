@@ -26,8 +26,6 @@ object FastDraft : FeatureBase<FastDraftConfig>(FAST_DRAFT_INFO) {
                 longrun {
                     ensureEnabled()
 
-                    println(event.messageRaw)
-
                     puzzleFailPatterns.forEach { pattern ->
                         pattern.matchEntire(event.messageRaw)?.let { matchResult ->
                             if (config.chatHintEnabled) {
