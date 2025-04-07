@@ -8,6 +8,8 @@ import net.skymoe.enchaddons.impl.config.EnchAddonsConfig
 import net.skymoe.enchaddons.util.tickCounter
 
 fun startGamePost() {
+    MinecraftEvent.Load.Post
+        .also(EA.eventDispatcher)
 }
 
 fun onRunTickPre() {
