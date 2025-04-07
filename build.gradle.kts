@@ -116,6 +116,7 @@ dependencies {
     }
 
     implementation("net.hypixel:mod-api:1.0.1")
+    modImplementation("net.hypixel:mod-api-forge:1.0.1.2")
     implementation("org.antlr:ST4:4.3.4")
 
     shade("com.squareup.okhttp3:okhttp:4.12.0")
