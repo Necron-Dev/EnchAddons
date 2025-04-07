@@ -33,8 +33,6 @@ object MapRender {
         get() = AwesomeMap.config.legitMode && !legitPeek
 
     fun renderMap() {
-        MC.mcProfiler.startSection("border")
-
         RenderUtils.renderRect(
             0.0,
             0.0,
@@ -52,8 +50,6 @@ object MapRender {
             AwesomeMap.config.mapBorder.toJavaColor(),
         )
 
-        MC.mcProfiler.endSection()
-
         if (AwesomeMap.config.mapRotate) {
             GlStateManager.pushMatrix()
             setupRotate()
@@ -63,15 +59,11 @@ object MapRender {
             GlStateManager.translate(-64.0, -64.0, 0.0)
         }
 
-        MC.mcProfiler.startSection("rooms")
         renderRooms()
-        MC.mcProfiler.endStartSection("text")
         renderText()
         if (!inBoss) {
-            MC.mcProfiler.endStartSection("heads")
             renderPlayerHeads()
         }
-        MC.mcProfiler.endSection()
 
         if (AwesomeMap.config.mapRotate) {
             GL11.glDisable(GL11.GL_SCISSOR_TEST)
@@ -83,9 +75,7 @@ object MapRender {
         }
 
         if (AwesomeMap.config.mapShowRunInformation) {
-            MC.mcProfiler.startSection("footer")
             renderRunInformation()
-            MC.mcProfiler.endSection()
         }
     }
 

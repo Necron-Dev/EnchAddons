@@ -15,7 +15,6 @@ import net.skymoe.enchaddons.impl.feature.awesomemap.utils.RenderUtils.darken
 import net.skymoe.enchaddons.impl.feature.awesomemap.utils.RenderUtils.grayScale
 import net.skymoe.enchaddons.impl.feature.awesomemap.utils.RenderUtilsGL
 import net.skymoe.enchaddons.impl.feature.awesomemap.utils.Utils.equalsOneOf
-import net.skymoe.enchaddons.util.MC
 import org.lwjgl.opengl.GL11
 
 object MapRenderList {
@@ -69,11 +68,7 @@ object MapRenderList {
         RenderUtils.preDraw()
         RenderUtilsGL.preDraw()
 
-        MC.mcProfiler.startSection("border")
-
         if (borderGlList != -1) GL11.glCallList(borderGlList)
-
-        MC.mcProfiler.endSection()
 
         if (AwesomeMap.config.mapRotate) {
             GlStateManager.pushMatrix()
@@ -84,8 +79,6 @@ object MapRenderList {
             GlStateManager.translate(-64.0, -64.0, 0.0)
         }
 
-        MC.mcProfiler.startSection("rooms")
-
         if (roomGlList != -1) GL11.glCallList(roomGlList)
 
         RenderUtilsGL.unbindTexture()
@@ -94,11 +87,8 @@ object MapRenderList {
         GlStateManager.popMatrix()
 
         if (!inBoss) {
-            MC.mcProfiler.endStartSection("heads")
             MapRender.renderPlayerHeads()
         }
-
-        MC.mcProfiler.endSection()
 
         if (AwesomeMap.config.mapRotate) {
             GL11.glDisable(GL11.GL_SCISSOR_TEST)
@@ -110,9 +100,7 @@ object MapRenderList {
         }
 
         if (AwesomeMap.config.mapShowRunInformation) {
-            MC.mcProfiler.startSection("footer")
             MapRender.renderRunInformation()
-            MC.mcProfiler.endSection()
         }
     }
 

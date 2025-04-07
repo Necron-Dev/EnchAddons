@@ -1,10 +1,10 @@
 package net.skymoe.enchaddons.feature.awesomemap
 
+import kotlinx.atomicfu.atomic
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.launch
 import net.minecraft.client.gui.GuiScreen
 import net.minecraft.client.settings.KeyBinding
-import net.minecraftforge.client.ClientCommandHandler
-import net.minecraftforge.common.MinecraftForge
 import net.minecraftforge.fml.client.registry.ClientRegistry
 import net.minecraftforge.fml.common.gameevent.InputEvent
 import net.skymoe.enchaddons.event.RegistryEventDispatcher
@@ -14,13 +14,10 @@ import net.skymoe.enchaddons.feature.FeatureBase
 import net.skymoe.enchaddons.feature.ensureEnabled
 import net.skymoe.enchaddons.feature.ensureSkyBlockMode
 import net.skymoe.enchaddons.feature.featureInfo
-import net.skymoe.enchaddons.impl.feature.awesomemap.commands.FunnyMapCommands
-import net.skymoe.enchaddons.impl.feature.awesomemap.features.dungeon.Dungeon
-import net.skymoe.enchaddons.impl.feature.awesomemap.features.dungeon.MapRender
-import net.skymoe.enchaddons.impl.feature.awesomemap.features.dungeon.RunInformation
-import net.skymoe.enchaddons.impl.feature.awesomemap.features.dungeon.WitherDoorESP
+import net.skymoe.enchaddons.impl.feature.awesomemap.features.dungeon.*
 import net.skymoe.enchaddons.impl.feature.awesomemap.ui.GuiRenderer
 import net.skymoe.enchaddons.impl.feature.awesomemap.utils.Location
+import net.skymoe.enchaddons.impl.feature.awesomemap.utils.MapUtils
 import net.skymoe.enchaddons.impl.feature.awesomemap.utils.RenderUtils
 import net.skymoe.enchaddons.impl.nanovg.GUIEvent
 import net.skymoe.enchaddons.util.MC
@@ -31,42 +28,10 @@ import kotlin.coroutines.EmptyCoroutineContext
 val AWESOME_MAP_INFO = featureInfo<AwesomeMapConfig>("awesome_map", "Awesome Map")
 
 object AwesomeMap : FeatureBase<AwesomeMapConfig>(AWESOME_MAP_INFO) {
-    var display: GuiScreen? = null
+    private var display: GuiScreen? = null
     private val toggleLegitKey = KeyBinding("Legit Peek", Keyboard.KEY_NONE, "Funny Map")
     val scope = CoroutineScope(EmptyCoroutineContext)
-
-    private fun onInit() {
-        ClientCommandHandler.instance.registerCommand((FunnyMapCommands()))
-        listOf(
-            this,
-            Dungeon,
-            GuiRenderer,
-            Location,
-            RunInformation,
-            WitherDoorESP,
-        ).forEach(MinecraftForge.EVENT_BUS::register)
-        RenderUtils
-        ClientRegistry.registerKeyBinding(toggleLegitKey)
-    }
-
-    fun onTick() {
-        MC.mcProfiler.startSection("awesome_map")
-
-        if (display != null) {
-            MC.displayGuiScreen(display)
-            display = null
-        }
-
-        if (config.peekMode == 1) {
-            MapRender.legitPeek = toggleLegitKey.isKeyDown
-        }
-
-        Dungeon.onTick()
-        GuiRenderer.onTick()
-        Location.onTick()
-
-        MC.mcProfiler.endSection()
-    }
+    private var runningTick = atomic(false)
 
     fun onKey(event: InputEvent.KeyInputEvent) {
         if (config.peekMode == 0 && toggleLegitKey.isPressed) {
@@ -77,7 +42,21 @@ object AwesomeMap : FeatureBase<AwesomeMapConfig>(AWESOME_MAP_INFO) {
     override fun registerEvents(dispatcher: RegistryEventDispatcher) {
         dispatcher.run {
             register<MinecraftEvent.Load> {
-                onInit()
+                Dungeon
+                GuiRenderer
+                Location
+                DungeonScan
+                RenderUtils
+                MapRender
+                MapRenderList
+                MapUpdate
+                MimicDetector
+                PlayerTracker
+                RunInformation
+                ScanUtils
+                ScoreCalculation
+                WitherDoorESP
+                ClientRegistry.registerKeyBinding(toggleLegitKey)
             }
 
             register<MinecraftEvent.Tick.Pre> {
@@ -85,7 +64,22 @@ object AwesomeMap : FeatureBase<AwesomeMapConfig>(AWESOME_MAP_INFO) {
                     ensureEnabled()
                     ensureSkyBlockMode("dungeon")
 
-                    onTick()
+                    if (display != null) {
+                        MC.displayGuiScreen(display)
+                        display = null
+                    }
+
+                    if (config.peekMode == 1) {
+                        MapRender.legitPeek = toggleLegitKey.isKeyDown
+                    }
+
+                    scope.launch {
+                        if (runningTick.getAndSet(true)) return@launch
+                        Dungeon.onTick()
+                        GuiRenderer.onTick()
+                        Location.onTick()
+                        runningTick.value = false
+                    }
                 }
             }
 
@@ -143,6 +137,15 @@ object AwesomeMap : FeatureBase<AwesomeMapConfig>(AWESOME_MAP_INFO) {
                     ensureSkyBlockMode("dungeon")
 
                     RunInformation.onScoreboard(event)
+                }
+            }
+
+            register<MapEvent.Pre> { event ->
+                longrun {
+                    ensureEnabled()
+                    ensureSkyBlockMode("dungeon")
+
+                    MapUtils.onUpdateMapData(event)
                 }
             }
 

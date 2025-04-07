@@ -2,11 +2,13 @@ package net.skymoe.enchaddons.impl.mixincallback
 
 import net.minecraft.network.play.server.S02PacketChat
 import net.minecraft.network.play.server.S32PacketConfirmTransaction
+import net.minecraft.network.play.server.S34PacketMaps
 import net.minecraft.network.play.server.S38PacketPlayerListItem
 import net.minecraft.network.play.server.S3EPacketTeams
 import net.skymoe.enchaddons.EA
 import net.skymoe.enchaddons.event.hypixel.SkyblockEvent
 import net.skymoe.enchaddons.event.minecraft.ChatEvent
+import net.skymoe.enchaddons.event.minecraft.MapEvent
 import net.skymoe.enchaddons.event.minecraft.TabListEvent
 import net.skymoe.enchaddons.event.minecraft.TeamEvent
 import net.skymoe.enchaddons.util.math.int
@@ -38,7 +40,7 @@ object NetHandlerPlayClientCallback {
             .also(EA.eventDispatcher)
     }
 
-    fun onS3ETeamsPre(packet: S3EPacketTeams) {
+    fun onS3EPacketTeamsPre(packet: S3EPacketTeams) {
         when (packet.action) {
             0 -> TeamEvent.Pre.Create(packet)
             1 -> TeamEvent.Pre.Remove(packet)
@@ -47,5 +49,11 @@ object NetHandlerPlayClientCallback {
             4 -> TeamEvent.Pre.RemovePlayer(packet)
             else -> null
         }?.also(EA.eventDispatcher)
+    }
+
+    fun onS34PacketMapsPre(packet: S34PacketMaps) {
+        MapEvent
+            .Pre(packet)
+            .also(EA.eventDispatcher)
     }
 }

@@ -8,7 +8,6 @@ import net.skymoe.enchaddons.impl.feature.awesomemap.core.DungeonPlayer
 import net.skymoe.enchaddons.impl.feature.awesomemap.core.map.*
 import net.skymoe.enchaddons.impl.feature.awesomemap.features.dungeon.Dungeon.Info.ended
 import net.skymoe.enchaddons.impl.feature.awesomemap.utils.Location
-import net.skymoe.enchaddons.impl.feature.awesomemap.utils.Location.inDungeons
 import net.skymoe.enchaddons.impl.feature.awesomemap.utils.MapUtils
 import net.skymoe.enchaddons.impl.feature.awesomemap.utils.TabList
 import net.skymoe.enchaddons.impl.feature.awesomemap.utils.Utils.equalsOneOf
@@ -30,8 +29,6 @@ object Dungeon {
         )
 
     fun onTick() {
-        if (!inDungeons) return
-
         if (shouldSearchMimic()) {
             MimicDetector.findMimic()?.let {
                 if (AwesomeMap.config.scanChatInfo) printChat("&7Mimic Room: &c$it")
@@ -59,7 +56,7 @@ object Dungeon {
         }
 
         if (DungeonScan.shouldScan) {
-//            scope.launch { DungeonScan.scan() }
+//            AwesomeMap.scope.launch { DungeonScan.scan() }
             DungeonScan.scan()
         }
     }

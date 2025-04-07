@@ -2,9 +2,9 @@ package net.skymoe.enchaddons.impl.feature.awesomemap.utils
 
 import net.minecraft.item.ItemMap
 import net.minecraft.item.ItemStack
-import net.minecraft.network.play.server.S34PacketMaps
 import net.minecraft.util.Vec4b
 import net.minecraft.world.storage.MapData
+import net.skymoe.enchaddons.event.minecraft.MapEvent
 import net.skymoe.enchaddons.impl.feature.awesomemap.features.dungeon.DungeonScan
 import net.skymoe.enchaddons.impl.feature.awesomemap.utils.Location.inDungeons
 import net.skymoe.enchaddons.impl.feature.awesomemap.utils.Utils.equalsOneOf
@@ -35,7 +35,7 @@ object MapUtils {
         return map
     }
 
-    fun updateMapData(packet: S34PacketMaps) {
+    fun onUpdateMapData(event: MapEvent.Pre) {
         if (!inDungeons) return
         Utils.runMinecraftThread {
             val map = getMapItem()
@@ -43,9 +43,9 @@ object MapUtils {
                 mapData = (map.item as ItemMap).getMapData(map, MC.theWorld)
             }
             if (mapData == null) {
-                mapData = MapData("map_${packet.mapId}")
+                mapData = MapData("map_${event.packet.mapId}")
             }
-            packet.setMapdataTo(mapData)
+            event.packet.setMapdataTo(mapData)
             mapDataUpdated = true
         }
     }

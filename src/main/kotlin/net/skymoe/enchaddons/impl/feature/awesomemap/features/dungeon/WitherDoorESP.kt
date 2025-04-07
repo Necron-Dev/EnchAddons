@@ -14,8 +14,6 @@ object WitherDoorESP {
     fun onRender(event: RenderEvent.World.Last) {
         if (inBoss || AwesomeMap.config.witherDoorESP == 0) return
 
-        MC.mcProfiler.startSection("funnymap-3d")
-
         val (x, y, z) = MC.renderViewEntity.getInterpolatedPosition(event.partialTicks)
         GlStateManager.translate(-x, -y, -z)
         Dungeon.espDoors.forEach { door ->
@@ -35,7 +33,5 @@ object WitherDoorESP {
             )
         }
         GlStateManager.translate(x, y, z)
-
-        MC.mcProfiler.endSection()
     }
 }

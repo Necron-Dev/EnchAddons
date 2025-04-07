@@ -2,10 +2,7 @@ package net.skymoe.enchaddons.impl.mixin;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.network.NetHandlerPlayClient;
-import net.minecraft.network.play.server.S02PacketChat;
-import net.minecraft.network.play.server.S32PacketConfirmTransaction;
-import net.minecraft.network.play.server.S38PacketPlayerListItem;
-import net.minecraft.network.play.server.S3EPacketTeams;
+import net.minecraft.network.play.server.*;
 import net.skymoe.enchaddons.impl.mixincallback.NetHandlerPlayClientCallback;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -38,6 +35,12 @@ public abstract class NetHandlerPlayClientMixin {
     @Inject(method = "handleTeams", at = @At(value = "INVOKE", target = "Lnet/minecraft/network/PacketThreadUtil;checkThreadAndEnqueue(Lnet/minecraft/network/Packet;Lnet/minecraft/network/INetHandler;Lnet/minecraft/util/IThreadListener;)V", shift = At.Shift.AFTER))
     public void processPacket(S3EPacketTeams packetIn, CallbackInfo ci) {
 //        if (!gameController.isCallingFromMinecraftThread()) return;
-        NetHandlerPlayClientCallback.INSTANCE.onS3ETeamsPre(packetIn);
+        NetHandlerPlayClientCallback.INSTANCE.onS3EPacketTeamsPre(packetIn);
+    }
+
+    @Inject(method = "handleMaps", at = @At(value = "INVOKE", target = "Lnet/minecraft/network/PacketThreadUtil;checkThreadAndEnqueue(Lnet/minecraft/network/Packet;Lnet/minecraft/network/INetHandler;Lnet/minecraft/util/IThreadListener;)V", shift = At.Shift.AFTER))
+    public void processPacket(S34PacketMaps packetIn, CallbackInfo ci) {
+//        if (!gameController.isCallingFromMinecraftThread()) return;
+        NetHandlerPlayClientCallback.INSTANCE.onS34PacketMapsPre(packetIn);
     }
 }

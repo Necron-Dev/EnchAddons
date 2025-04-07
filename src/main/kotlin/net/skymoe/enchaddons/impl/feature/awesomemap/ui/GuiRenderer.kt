@@ -31,8 +31,6 @@ object GuiRenderer {
     fun onOverlay(event: GUIEvent.HUD) {
         if (MC.currentScreen is EditLocationGui) return
 
-        MC.mcProfiler.startSection("awesomemap-2d")
-
         MC.entityRenderer.setupOverlayRendering()
 
         elements.forEach {
@@ -55,8 +53,6 @@ object GuiRenderer {
                 center = true,
             )
         }
-
-        MC.mcProfiler.endSection()
     }
 
     fun onTick() {
