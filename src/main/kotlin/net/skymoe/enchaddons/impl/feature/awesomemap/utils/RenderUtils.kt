@@ -1,100 +1,24 @@
 package net.skymoe.enchaddons.impl.feature.awesomemap.utils
 
-import net.minecraft.client.gui.Gui
+import cc.polyfrost.oneconfig.renderer.NanoVGHelper
 import net.minecraft.client.renderer.GlStateManager
-import net.minecraft.client.renderer.Tessellator
-import net.minecraft.client.renderer.WorldRenderer
-import net.minecraft.client.renderer.vertex.DefaultVertexFormats
 import net.minecraft.entity.Entity
-import net.minecraft.util.AxisAlignedBB
-import net.minecraft.util.ResourceLocation
 import net.skymoe.enchaddons.feature.awesomemap.AwesomeMap
 import net.skymoe.enchaddons.impl.feature.awesomemap.core.DungeonPlayer
 import net.skymoe.enchaddons.impl.feature.awesomemap.core.map.RoomState
-import net.skymoe.enchaddons.impl.feature.awesomemap.features.dungeon.DungeonScan
 import net.skymoe.enchaddons.impl.feature.awesomemap.features.dungeon.MapRender
-import net.skymoe.enchaddons.impl.feature.awesomemap.utils.Utils.equalsOneOf
-import net.skymoe.enchaddons.impl.feature.awesomemap.utils.Utils.itemID
 import net.skymoe.enchaddons.util.MC
-import net.skymoe.enchaddons.util.withAlpha
-import org.lwjgl.opengl.GL11
-import org.lwjgl.opengl.GL11.GL_LINE_STRIP
-import org.lwjgl.opengl.GL11.GL_QUADS
+import net.skymoe.enchaddons.util.math.float
 import java.awt.Color
 import kotlin.math.roundToInt
 
 object RenderUtils {
-    private val tessellator: Tessellator = Tessellator.getInstance()
-    private val worldRenderer: WorldRenderer = tessellator.worldRenderer
-    val neuCheckmarks = CheckmarkSet(10, "neu")
-    val defaultCheckmarks = CheckmarkSet(16, "default")
-    val legacyCheckmarks = CheckmarkSet(8, "legacy")
-    private val mapIcons = ResourceLocation("funnymap", "marker.png")
-
-    fun preDraw() {
-        GlStateManager.enableAlpha()
-        GlStateManager.enableBlend()
-        GlStateManager.disableDepth()
-        GlStateManager.disableLighting()
-        GlStateManager.disableTexture2D()
-        GlStateManager.tryBlendFuncSeparate(770, 771, 1, 0)
-    }
-
-    fun postDraw() {
-        GlStateManager.disableBlend()
-        GlStateManager.enableDepth()
-        GlStateManager.enableTexture2D()
-    }
-
-    fun addQuadVertices(
-        x: Double,
-        y: Double,
-        w: Double,
-        h: Double,
-    ) {
-        worldRenderer.pos(x, y + h, 0.0).endVertex()
-        worldRenderer.pos(x + w, y + h, 0.0).endVertex()
-        worldRenderer.pos(x + w, y, 0.0).endVertex()
-        worldRenderer.pos(x, y, 0.0).endVertex()
-    }
-
-    fun drawTexturedQuad(
-        x: Double,
-        y: Double,
-        width: Double,
-        height: Double,
-    ) {
-        worldRenderer.begin(GL_QUADS, DefaultVertexFormats.POSITION_TEX)
-        worldRenderer.pos(x, y + height, 0.0).tex(0.0, 1.0).endVertex()
-        worldRenderer.pos(x + width, y + height, 0.0).tex(1.0, 1.0).endVertex()
-        worldRenderer.pos(x + width, y, 0.0).tex(1.0, 0.0).endVertex()
-        worldRenderer.pos(x, y, 0.0).tex(0.0, 0.0).endVertex()
-        tessellator.draw()
-    }
-
-    fun drawBox(
-        aabb: AxisAlignedBB,
-        color: Color,
-        width: Float,
-        outline: Float,
-        fill: Float,
-        ignoreDepth: Boolean,
-    ) {
-        GlStateManager.pushMatrix()
-        preDraw()
-        GlStateManager.depthMask(!ignoreDepth)
-        GL11.glLineWidth(width)
-
-        drawOutlinedAABB(aabb, color)
-
-        drawFilledAABB(aabb, color.withAlpha(fill))
-
-        GlStateManager.depthMask(true)
-        postDraw()
-        GlStateManager.popMatrix()
-    }
+//    val neuCheckmarks = CheckmarkSet(10, "neu")
+//    val defaultCheckmarks = CheckmarkSet(16, "default")
+//    val legacyCheckmarks = CheckmarkSet(8, "legacy")
 
     fun renderRect(
+        vg: Long,
         x: Number,
         y: Number,
         w: Number,
@@ -102,17 +26,19 @@ object RenderUtils {
         color: Color,
     ) {
         if (color.alpha == 0) return
-        preDraw()
-        color.bind()
-
-        worldRenderer.begin(GL_QUADS, DefaultVertexFormats.POSITION)
-        addQuadVertices(x.toDouble(), y.toDouble(), w.toDouble(), h.toDouble())
-        tessellator.draw()
-
-        postDraw()
+        NanoVGHelper.INSTANCE.drawRoundedRect(
+            vg,
+            x.toFloat(),
+            y.toFloat(),
+            w.toFloat(),
+            h.toFloat(),
+            color.toARGBInt(),
+            4.0F, // TODO
+        )
     }
 
     fun renderRectBorder(
+        vg: Long,
         x: Double,
         y: Double,
         w: Double,
@@ -121,25 +47,26 @@ object RenderUtils {
         color: Color,
     ) {
         if (color.alpha == 0) return
-        preDraw()
-        color.bind()
-
-        worldRenderer.begin(GL_QUADS, DefaultVertexFormats.POSITION)
-        addQuadVertices(x - thickness, y, thickness, h)
-        addQuadVertices(x - thickness, y - thickness, w + thickness * 2, thickness)
-        addQuadVertices(x + w, y, thickness, h)
-        addQuadVertices(x - thickness, y + h, w + thickness * 2, thickness)
-        tessellator.draw()
-
-        postDraw()
+        NanoVGHelper.INSTANCE.drawHollowRoundRect(
+            vg,
+            x.toFloat(),
+            y.toFloat(),
+            w.toFloat(),
+            h.toFloat(),
+            color.toARGBInt(),
+            4.0F, // TODO
+            thickness.float,
+        )
     }
 
     fun renderCenteredText(
+        vg: Long,
         text: List<String>,
         x: Int,
         y: Int,
         color: Int,
     ) {
+        // TODO
         if (text.isEmpty()) return
         GlStateManager.pushMatrix()
         GlStateManager.translate(x.toFloat(), y.toFloat(), 0f)
@@ -172,114 +99,115 @@ object RenderUtils {
     }
 
     fun drawCheckmark(
+        vg: Long,
         x: Float,
         y: Float,
         state: RoomState,
     ) {
-        val (checkmark, size) =
-            when (AwesomeMap.config.mapCheckmark) {
-                1 -> defaultCheckmarks.getCheckmark(state) to defaultCheckmarks.size.toDouble()
-                2 -> neuCheckmarks.getCheckmark(state) to neuCheckmarks.size.toDouble()
-                3 -> legacyCheckmarks.getCheckmark(state) to legacyCheckmarks.size.toDouble()
-                else -> return
-            }
-        if (checkmark != null) {
-            GlStateManager.enableAlpha()
-            GlStateManager.color(1f, 1f, 1f, 1f)
-            MC.textureManager.bindTexture(checkmark)
-
-            drawTexturedQuad(
-                x + (MapUtils.roomSize - size) / 2,
-                y + (MapUtils.roomSize - size) / 2,
-                size,
-                size,
-            )
-            GlStateManager.disableAlpha()
-        }
+//        // TODO
+//        val (checkmark, size) =
+//            when (AwesomeMap.config.mapCheckmark) {
+//                1 -> defaultCheckmarks.getCheckmark(state) to defaultCheckmarks.size.toDouble()
+//                2 -> neuCheckmarks.getCheckmark(state) to neuCheckmarks.size.toDouble()
+//                3 -> legacyCheckmarks.getCheckmark(state) to legacyCheckmarks.size.toDouble()
+//                else -> return
+//            }
+//        if (checkmark != null) {
+//            GlStateManager.enableAlpha()
+//            GlStateManager.color(1f, 1f, 1f, 1f)
+//            MC.textureManager.bindTexture(checkmark)
+//
+//            drawTexturedQuad(
+//                x + (MapUtils.roomSize - size) / 2,
+//                y + (MapUtils.roomSize - size) / 2,
+//                size,
+//                size,
+//            )
+//            GlStateManager.disableAlpha()
+//        }
     }
 
     fun drawPlayerHead(
+        vg: Long,
         name: String,
         player: DungeonPlayer,
     ) {
-        GlStateManager.pushMatrix()
-        try {
-            // Translates to the player's location which is updated every tick.
-            if (player.isPlayer || name == MC.thePlayer.name) {
-                GlStateManager.translate(
-                    (MC.thePlayer.posX - DungeonScan.START_X + 15) * MapUtils.coordMultiplier + MapUtils.startCorner.first,
-                    (MC.thePlayer.posZ - DungeonScan.START_Z + 15) * MapUtils.coordMultiplier + MapUtils.startCorner.second,
-                    0.0,
-                )
-            } else {
-                GlStateManager.translate(player.mapX.toFloat(), player.mapZ.toFloat(), 0f)
-            }
-
-            // Apply head rotation and scaling
-            GlStateManager.rotate(player.yaw + 180f, 0f, 0f, 1f)
-            GlStateManager.scale(AwesomeMap.config.playerHeadScale, AwesomeMap.config.playerHeadScale, 1f)
-            GlStateManager.enableAlpha()
-
-            if (AwesomeMap.config.mapVanillaMarker && (player.isPlayer || name == MC.thePlayer.name)) {
-                GlStateManager.rotate(180f, 0f, 0f, 1f)
-                GlStateManager.color(1f, 1f, 1f, 1f)
-                MC.textureManager.bindTexture(mapIcons)
-                worldRenderer.begin(7, DefaultVertexFormats.POSITION_TEX)
-                worldRenderer.pos(-6.0, 6.0, 0.0).tex(0.0, 0.0).endVertex()
-                worldRenderer.pos(6.0, 6.0, 0.0).tex(1.0, 0.0).endVertex()
-                worldRenderer.pos(6.0, -6.0, 0.0).tex(1.0, 1.0).endVertex()
-                worldRenderer.pos(-6.0, -6.0, 0.0).tex(0.0, 1.0).endVertex()
-                tessellator.draw()
-                GlStateManager.rotate(-180f, 0f, 0f, 1f)
-            } else {
-                // Render black border around the player head
-                renderRectBorder(-6.0, -6.0, 12.0, 12.0, 1.0, Color(0, 0, 0, 255))
-
-                preDraw()
-                GlStateManager.enableTexture2D()
-                GlStateManager.color(1f, 1f, 1f, 1f)
-
-                MC.textureManager.bindTexture(player.skin)
-
-                Gui.drawScaledCustomSizeModalRect(-6, -6, 8f, 8f, 8, 8, 12, 12, 64f, 64f)
-                if (player.renderHat) {
-                    Gui.drawScaledCustomSizeModalRect(-6, -6, 40f, 8f, 8, 8, 12, 12, 64f, 64f)
-                }
-
-                postDraw()
-            }
-
-            // Handle player names
-            if (AwesomeMap.config.playerHeads == 2 ||
-                AwesomeMap.config.playerHeads == 1 &&
-                MC.thePlayer.heldItem?.itemID.equalsOneOf(
-                    "SPIRIT_LEAP",
-                    "INFINITE_SPIRIT_LEAP",
-                    "HAUNT_ABILITY",
-                )
-            ) {
-                if (!AwesomeMap.config.mapRotate) {
-                    GlStateManager.rotate(-player.yaw + 180f, 0f, 0f, 1f)
-                }
-                GlStateManager.translate(0f, 10f, 0f)
-                GlStateManager.scale(AwesomeMap.config.playerNameScale, AwesomeMap.config.playerNameScale, 1f)
-                MC.fontRendererObj.drawString(
-                    name,
-                    -MC.fontRendererObj.getStringWidth(name) / 2f,
-                    0f,
-                    0xffffff,
-                    true,
-                )
-            }
-        } catch (e: Exception) {
-            e.printStackTrace()
-        }
-        GlStateManager.popMatrix()
+//        GlStateManager.pushMatrix()
+//        try {
+//            // Translates to the player's location which is updated every tick.
+//            if (player.isPlayer || name == MC.thePlayer.name) {
+//                GlStateManager.translate(
+//                    (MC.thePlayer.posX - DungeonScan.START_X + 15) * MapUtils.coordMultiplier + MapUtils.startCorner.first,
+//                    (MC.thePlayer.posZ - DungeonScan.START_Z + 15) * MapUtils.coordMultiplier + MapUtils.startCorner.second,
+//                    0.0,
+//                )
+//            } else {
+//                GlStateManager.translate(player.mapX.toFloat(), player.mapZ.toFloat(), 0f)
+//            }
+//
+//            // Apply head rotation and scaling
+//            GlStateManager.rotate(player.yaw + 180f, 0f, 0f, 1f)
+//            GlStateManager.scale(AwesomeMap.config.playerHeadScale, AwesomeMap.config.playerHeadScale, 1f)
+//            GlStateManager.enableAlpha()
+//
+//            if (AwesomeMap.config.mapVanillaMarker && (player.isPlayer || name == MC.thePlayer.name)) {
+//                GlStateManager.rotate(180f, 0f, 0f, 1f)
+//                GlStateManager.color(1f, 1f, 1f, 1f)
+//                MC.textureManager.bindTexture(mapIcons)
+//                worldRenderer.begin(7, DefaultVertexFormats.POSITION_TEX)
+//                worldRenderer.pos(-6.0, 6.0, 0.0).tex(0.0, 0.0).endVertex()
+//                worldRenderer.pos(6.0, 6.0, 0.0).tex(1.0, 0.0).endVertex()
+//                worldRenderer.pos(6.0, -6.0, 0.0).tex(1.0, 1.0).endVertex()
+//                worldRenderer.pos(-6.0, -6.0, 0.0).tex(0.0, 1.0).endVertex()
+//                tessellator.draw()
+//                GlStateManager.rotate(-180f, 0f, 0f, 1f)
+//            } else {
+//                // Render black border around the player head
+//                renderRectBorder(-6.0, -6.0, 12.0, 12.0, 1.0, Color(0, 0, 0, 255))
+//
+//                preDraw()
+//                GlStateManager.enableTexture2D()
+//                GlStateManager.color(1f, 1f, 1f, 1f)
+//
+//                MC.textureManager.bindTexture(player.skin)
+//
+//                Gui.drawScaledCustomSizeModalRect(-6, -6, 8f, 8f, 8, 8, 12, 12, 64f, 64f)
+//                if (player.renderHat) {
+//                    Gui.drawScaledCustomSizeModalRect(-6, -6, 40f, 8f, 8, 8, 12, 12, 64f, 64f)
+//                }
+//
+//                postDraw()
+//            }
+//
+//            // Handle player names
+//            if (AwesomeMap.config.playerHeads == 2 ||
+//                AwesomeMap.config.playerHeads == 1 &&
+//                MC.thePlayer.heldItem?.itemID.equalsOneOf(
+//                    "SPIRIT_LEAP",
+//                    "INFINITE_SPIRIT_LEAP",
+//                    "HAUNT_ABILITY",
+//                )
+//            ) {
+//                if (!AwesomeMap.config.mapRotate) {
+//                    GlStateManager.rotate(-player.yaw + 180f, 0f, 0f, 1f)
+//                }
+//                GlStateManager.translate(0f, 10f, 0f)
+//                GlStateManager.scale(AwesomeMap.config.playerNameScale, AwesomeMap.config.playerNameScale, 1f)
+//                MC.fontRendererObj.drawString(
+//                    name,
+//                    -MC.fontRendererObj.getStringWidth(name) / 2f,
+//                    0f,
+//                    0xffffff,
+//                    true,
+//                )
+//            }
+//        } catch (e: Exception) {
+//            e.printStackTrace()
+//        }
+//        GlStateManager.popMatrix()
     }
 
-    fun Color.bind() {
-        GlStateManager.color(this.red / 255f, this.green / 255f, this.blue / 255f, this.alpha / 255f)
-    }
+    fun Color.toARGBInt(): Int = (alpha shl 24) or (red shl 16) or (green shl 8) or blue
 
     fun Color.grayScale(): Color {
         val gray = (red * 0.299 + green * 0.587 + blue * 0.114).roundToInt()
@@ -297,6 +225,7 @@ object RenderUtils {
         )
 
     fun drawText(
+        vg: Long,
         text: String,
         x: Float,
         y: Float,
@@ -329,99 +258,5 @@ object RenderUtils {
         }
         GlStateManager.disableBlend()
         GlStateManager.popMatrix()
-    }
-
-    fun drawFilledAABB(
-        aabb: AxisAlignedBB,
-        color: Color,
-    ) {
-        color.bind()
-
-        worldRenderer.begin(GL_QUADS, DefaultVertexFormats.POSITION)
-
-        worldRenderer.pos(aabb.minX, aabb.minY, aabb.minZ).endVertex()
-        worldRenderer.pos(aabb.minX, aabb.maxY, aabb.minZ).endVertex()
-        worldRenderer.pos(aabb.maxX, aabb.minY, aabb.minZ).endVertex()
-        worldRenderer.pos(aabb.maxX, aabb.maxY, aabb.minZ).endVertex()
-        worldRenderer.pos(aabb.maxX, aabb.minY, aabb.maxZ).endVertex()
-        worldRenderer.pos(aabb.maxX, aabb.maxY, aabb.maxZ).endVertex()
-        worldRenderer.pos(aabb.minX, aabb.minY, aabb.maxZ).endVertex()
-        worldRenderer.pos(aabb.minX, aabb.maxY, aabb.maxZ).endVertex()
-
-        worldRenderer.pos(aabb.maxX, aabb.maxY, aabb.minZ).endVertex()
-        worldRenderer.pos(aabb.maxX, aabb.minY, aabb.minZ).endVertex()
-        worldRenderer.pos(aabb.minX, aabb.maxY, aabb.minZ).endVertex()
-        worldRenderer.pos(aabb.minX, aabb.minY, aabb.minZ).endVertex()
-        worldRenderer.pos(aabb.minX, aabb.maxY, aabb.maxZ).endVertex()
-        worldRenderer.pos(aabb.minX, aabb.minY, aabb.maxZ).endVertex()
-        worldRenderer.pos(aabb.maxX, aabb.maxY, aabb.maxZ).endVertex()
-        worldRenderer.pos(aabb.maxX, aabb.minY, aabb.maxZ).endVertex()
-
-        worldRenderer.pos(aabb.minX, aabb.maxY, aabb.minZ).endVertex()
-        worldRenderer.pos(aabb.maxX, aabb.maxY, aabb.minZ).endVertex()
-        worldRenderer.pos(aabb.maxX, aabb.maxY, aabb.maxZ).endVertex()
-        worldRenderer.pos(aabb.minX, aabb.maxY, aabb.maxZ).endVertex()
-        worldRenderer.pos(aabb.minX, aabb.maxY, aabb.minZ).endVertex()
-        worldRenderer.pos(aabb.minX, aabb.maxY, aabb.maxZ).endVertex()
-        worldRenderer.pos(aabb.maxX, aabb.maxY, aabb.maxZ).endVertex()
-        worldRenderer.pos(aabb.maxX, aabb.maxY, aabb.minZ).endVertex()
-
-        worldRenderer.pos(aabb.minX, aabb.minY, aabb.minZ).endVertex()
-        worldRenderer.pos(aabb.maxX, aabb.minY, aabb.minZ).endVertex()
-        worldRenderer.pos(aabb.maxX, aabb.minY, aabb.maxZ).endVertex()
-        worldRenderer.pos(aabb.minX, aabb.minY, aabb.maxZ).endVertex()
-        worldRenderer.pos(aabb.minX, aabb.minY, aabb.minZ).endVertex()
-        worldRenderer.pos(aabb.minX, aabb.minY, aabb.maxZ).endVertex()
-        worldRenderer.pos(aabb.maxX, aabb.minY, aabb.maxZ).endVertex()
-        worldRenderer.pos(aabb.maxX, aabb.minY, aabb.minZ).endVertex()
-
-        worldRenderer.pos(aabb.minX, aabb.minY, aabb.minZ).endVertex()
-        worldRenderer.pos(aabb.minX, aabb.maxY, aabb.minZ).endVertex()
-        worldRenderer.pos(aabb.minX, aabb.minY, aabb.maxZ).endVertex()
-        worldRenderer.pos(aabb.minX, aabb.maxY, aabb.maxZ).endVertex()
-        worldRenderer.pos(aabb.maxX, aabb.minY, aabb.maxZ).endVertex()
-        worldRenderer.pos(aabb.maxX, aabb.maxY, aabb.maxZ).endVertex()
-        worldRenderer.pos(aabb.maxX, aabb.minY, aabb.minZ).endVertex()
-        worldRenderer.pos(aabb.maxX, aabb.maxY, aabb.minZ).endVertex()
-
-        worldRenderer.pos(aabb.minX, aabb.maxY, aabb.maxZ).endVertex()
-        worldRenderer.pos(aabb.minX, aabb.minY, aabb.maxZ).endVertex()
-        worldRenderer.pos(aabb.minX, aabb.maxY, aabb.minZ).endVertex()
-        worldRenderer.pos(aabb.minX, aabb.minY, aabb.minZ).endVertex()
-        worldRenderer.pos(aabb.maxX, aabb.maxY, aabb.minZ).endVertex()
-        worldRenderer.pos(aabb.maxX, aabb.minY, aabb.minZ).endVertex()
-        worldRenderer.pos(aabb.maxX, aabb.maxY, aabb.maxZ).endVertex()
-        worldRenderer.pos(aabb.maxX, aabb.minY, aabb.maxZ).endVertex()
-        tessellator.draw()
-    }
-
-    fun drawOutlinedAABB(
-        aabb: AxisAlignedBB,
-        color: Color,
-    ) {
-        color.bind()
-
-        worldRenderer.begin(GL_LINE_STRIP, DefaultVertexFormats.POSITION)
-
-        worldRenderer.pos(aabb.minX, aabb.minY, aabb.minZ).endVertex()
-        worldRenderer.pos(aabb.minX, aabb.minY, aabb.maxZ).endVertex()
-        worldRenderer.pos(aabb.maxX, aabb.minY, aabb.maxZ).endVertex()
-        worldRenderer.pos(aabb.maxX, aabb.minY, aabb.minZ).endVertex()
-        worldRenderer.pos(aabb.minX, aabb.minY, aabb.minZ).endVertex()
-
-        worldRenderer.pos(aabb.minX, aabb.maxY, aabb.minZ).endVertex()
-        worldRenderer.pos(aabb.minX, aabb.maxY, aabb.maxZ).endVertex()
-        worldRenderer.pos(aabb.maxX, aabb.maxY, aabb.maxZ).endVertex()
-        worldRenderer.pos(aabb.maxX, aabb.maxY, aabb.minZ).endVertex()
-        worldRenderer.pos(aabb.minX, aabb.maxY, aabb.minZ).endVertex()
-
-        worldRenderer.pos(aabb.minX, aabb.maxY, aabb.maxZ).endVertex()
-        worldRenderer.pos(aabb.minX, aabb.minY, aabb.maxZ).endVertex()
-        worldRenderer.pos(aabb.maxX, aabb.minY, aabb.maxZ).endVertex()
-        worldRenderer.pos(aabb.maxX, aabb.maxY, aabb.maxZ).endVertex()
-        worldRenderer.pos(aabb.maxX, aabb.maxY, aabb.minZ).endVertex()
-        worldRenderer.pos(aabb.maxX, aabb.minY, aabb.minZ).endVertex()
-
-        tessellator.draw()
     }
 }

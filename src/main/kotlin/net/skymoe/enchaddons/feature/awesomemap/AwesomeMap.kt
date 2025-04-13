@@ -15,11 +15,9 @@ import net.skymoe.enchaddons.feature.ensureEnabled
 import net.skymoe.enchaddons.feature.ensureSkyBlockMode
 import net.skymoe.enchaddons.feature.featureInfo
 import net.skymoe.enchaddons.impl.feature.awesomemap.features.dungeon.*
-import net.skymoe.enchaddons.impl.feature.awesomemap.ui.GuiRenderer
 import net.skymoe.enchaddons.impl.feature.awesomemap.utils.Location
 import net.skymoe.enchaddons.impl.feature.awesomemap.utils.MapUtils
 import net.skymoe.enchaddons.impl.feature.awesomemap.utils.RenderUtils
-import net.skymoe.enchaddons.impl.nanovg.GUIEvent
 import net.skymoe.enchaddons.util.MC
 import net.skymoe.enchaddons.util.scope.longrun
 import org.lwjgl.input.Keyboard
@@ -35,7 +33,7 @@ object AwesomeMap : FeatureBase<AwesomeMapConfig>(AWESOME_MAP_INFO) {
 
     fun onKey(event: InputEvent.KeyInputEvent) {
         if (config.peekMode == 0 && toggleLegitKey.isPressed) {
-            MapRender.legitPeek = !MapRender.legitPeek
+//            MapRender.legitPeek = !MapRender.legitPeek
         }
     }
 
@@ -43,12 +41,12 @@ object AwesomeMap : FeatureBase<AwesomeMapConfig>(AWESOME_MAP_INFO) {
         dispatcher.run {
             register<MinecraftEvent.Load> {
                 Dungeon
-                GuiRenderer
+//                GuiRenderer
                 Location
                 DungeonScan
                 RenderUtils
-                MapRender
-                MapRenderList
+//                MapRender
+//                MapRenderList
                 MapUpdate
                 MimicDetector
                 PlayerTracker
@@ -70,13 +68,13 @@ object AwesomeMap : FeatureBase<AwesomeMapConfig>(AWESOME_MAP_INFO) {
                     }
 
                     if (config.peekMode == 1) {
-                        MapRender.legitPeek = toggleLegitKey.isKeyDown
+//                        MapRender.legitPeek = toggleLegitKey.isKeyDown
                     }
 
                     scope.launch {
                         if (runningTick.getAndSet(true)) return@launch
                         Dungeon.onTick()
-                        GuiRenderer.onTick()
+//                        GuiRenderer.onTick()
                         Location.onTick()
                         runningTick.value = false
                     }
@@ -94,14 +92,18 @@ object AwesomeMap : FeatureBase<AwesomeMapConfig>(AWESOME_MAP_INFO) {
                 }
             }
 
-            register<GUIEvent.HUD> { event ->
-                longrun {
-                    ensureEnabled()
-                    ensureSkyBlockMode("dungeon")
-
-                    GuiRenderer.onOverlay(event)
-                }
-            }
+//            register<GUIEvent.HUD.Post> { event ->
+//                longrun {
+//                    ensureEnabled()
+//                    ensureSkyBlockMode("dungeon")
+//
+//                    glStateScope {
+//                        NanoVGHelper.INSTANCE.setupAndDraw { vg ->
+//                            GuiRenderer.onOverlay(vg)
+//                        }
+//                    }
+//                }
+//            }
 
             register<MinecraftEvent.World.Unload> { event ->
                 longrun {

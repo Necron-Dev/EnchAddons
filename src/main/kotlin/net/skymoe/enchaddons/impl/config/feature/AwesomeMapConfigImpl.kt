@@ -5,7 +5,10 @@ import cc.polyfrost.oneconfig.config.annotations.Number
 import cc.polyfrost.oneconfig.config.core.OneColor
 import net.skymoe.enchaddons.feature.awesomemap.AWESOME_MAP_INFO
 import net.skymoe.enchaddons.feature.awesomemap.AwesomeMapConfig
+import net.skymoe.enchaddons.impl.config.AdvancedHUD
 import net.skymoe.enchaddons.impl.config.ConfigImpl
+import net.skymoe.enchaddons.impl.config.adapter.Extract
+import net.skymoe.enchaddons.impl.config.gui.GUIBackground
 
 class AwesomeMapConfigImpl :
     ConfigImpl(AWESOME_MAP_INFO),
@@ -732,4 +735,12 @@ class AwesomeMapConfigImpl :
         category = "Other Features",
     )
     override var customPrefix = ""
+
+    @Extract
+    var background = GUIBackground()
+
+    @HUD(
+        name = "HUD",
+    )
+    var hud = AdvancedHUD()
 }

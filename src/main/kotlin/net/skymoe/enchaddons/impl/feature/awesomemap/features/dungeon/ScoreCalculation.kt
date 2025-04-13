@@ -4,7 +4,6 @@ import net.skymoe.enchaddons.feature.awesomemap.AwesomeMap
 import net.skymoe.enchaddons.impl.feature.awesomemap.features.dungeon.RunInformation.completedRoomsPercentage
 import net.skymoe.enchaddons.impl.feature.awesomemap.features.dungeon.RunInformation.mimicKilled
 import net.skymoe.enchaddons.impl.feature.awesomemap.features.dungeon.RunInformation.secretPercentage
-import net.skymoe.enchaddons.impl.feature.awesomemap.ui.GuiRenderer
 import net.skymoe.enchaddons.impl.feature.awesomemap.utils.APIUtils
 import net.skymoe.enchaddons.impl.feature.awesomemap.utils.Location
 import net.skymoe.enchaddons.util.LogLevel
@@ -32,7 +31,7 @@ object ScoreCalculation {
             }
             if (AwesomeMap.config.scoreTitle != 0) {
                 MC.thePlayer.playSound("random.orb", 1f, 0.5.toFloat())
-                GuiRenderer.displayTitle(AwesomeMap.config.message300, 40)
+//                GuiRenderer.displayTitle(AwesomeMap.config.message300, 40) TODO
             }
             if (AwesomeMap.config.timeTo300) {
                 modMessage("§3300 Score§7: §a${RunInformation.timeElapsed.toDuration(DurationUnit.SECONDS)}", LogLevel.INFO)
@@ -44,7 +43,7 @@ object ScoreCalculation {
             }
             if (AwesomeMap.config.scoreTitle == 2) {
                 MC.thePlayer.playSound("random.orb", 1f, 0.5.toFloat())
-                GuiRenderer.displayTitle(AwesomeMap.config.message270, 40)
+//                GuiRenderer.displayTitle(AwesomeMap.config.message270, 40) TODO
             }
         }
     }

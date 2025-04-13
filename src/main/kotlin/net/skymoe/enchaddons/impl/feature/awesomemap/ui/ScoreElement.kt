@@ -4,43 +4,9 @@ import net.minecraft.client.gui.FontRenderer
 import net.skymoe.enchaddons.feature.awesomemap.AwesomeMap
 import net.skymoe.enchaddons.impl.feature.awesomemap.features.dungeon.RunInformation
 import net.skymoe.enchaddons.impl.feature.awesomemap.features.dungeon.ScoreCalculation
-import net.skymoe.enchaddons.impl.feature.awesomemap.utils.Location
 import net.skymoe.enchaddons.util.MC
 
-class ScoreElement : MovableGuiElement() {
-    override var x: Int by AwesomeMap.config::scoreX
-    override var y: Int by AwesomeMap.config::scoreY
-    override val h: Int
-        get() = fr.FONT_HEIGHT * elementLines
-    override val w: Int = fr.getStringWidth("Score: 100/100/100/7 : (300)")
-    override var scale: Float by AwesomeMap.config::scoreScale
-    override var x2: Int = (x + w * scale).toInt()
-    override var y2: Int = (y + h * scale).toInt()
-
-    private var elementLines = 1
-        set(value) {
-            if (field != value) {
-                field = value
-                y2 = (y + h * scale).toInt()
-            }
-        }
-
-    override fun render() {
-        var y = 0f
-        val lines = getScoreLines()
-        elementLines = lines.size
-        lines.forEach {
-            fr.drawString(it, 0f, y, 0xffffff, true)
-            y += fr.FONT_HEIGHT
-        }
-    }
-
-    override fun shouldRender(): Boolean {
-        if (!AwesomeMap.config.scoreElementEnabled) return false
-        if (AwesomeMap.config.scoreHideInBoss && Location.inBoss) return false
-        return super.shouldRender()
-    }
-
+class ScoreElement {
     companion object {
         val fr: FontRenderer = MC.fontRendererObj
 
@@ -151,7 +117,7 @@ class ScoreElement : MovableGuiElement() {
 
         private fun getMimic(minimized: Boolean = false): String {
             var line = if (minimized) "§7M: " else "§7Mimic: "
-            line += if (RunInformation.mimicKilled) "§a✔" else "§c✘"
+            line += if (RunInformation.mimicKilled) "§aY" else "§cN"
             return line
         }
 

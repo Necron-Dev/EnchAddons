@@ -5,7 +5,11 @@ import net.skymoe.enchaddons.impl.MOD_ID
 import net.skymoe.enchaddons.impl.oneconfig.NanoVGAccessor
 import net.skymoe.enchaddons.impl.oneconfig.NanoVGImageCacheEntry
 import net.skymoe.enchaddons.impl.oneconfig.nvg
+import net.skymoe.enchaddons.util.StyledSegment
 import net.skymoe.enchaddons.util.convertARGBToDoubleArray
+import net.skymoe.enchaddons.util.convertDoubleArrayToARGB
+import net.skymoe.enchaddons.util.math.Vec2D
+import net.skymoe.enchaddons.util.math.double
 import net.skymoe.enchaddons.util.math.float
 import net.skymoe.enchaddons.util.scope.withscope
 import net.skymoe.enchaddons.util.toBuffer
@@ -15,7 +19,7 @@ import org.lwjgl.nanovg.NanoVG.*
 import org.lwjgl.nanovg.NanoVGGL3.NVG_IMAGE_NODELETE
 import org.lwjgl.nanovg.NanoVGGL3.nvglCreateImageFromHandle
 import java.nio.ByteBuffer
-import java.util.UUID
+import java.util.*
 import kotlin.math.*
 
 private fun NVGColor.fill(argb: Int): NVGColor {
@@ -354,5 +358,234 @@ object NanoVGAccessorImpl : NanoVGAccessor {
                 radius,
             )
         }
+    }
+
+    override fun drawAccarc(
+        vg: Long,
+        lCorner: Int,
+        x: Double,
+        y: Double,
+        width: Double,
+        height: Double,
+        lWidth: Double,
+        lHeight: Double,
+        borderRadius: Double,
+        lRadius: Double,
+        color: Int,
+    ) {
+        nvgSave(vg)
+        nvgTranslate(vg, x.float, y.float)
+
+        if (lCorner != 0) {
+            when (lCorner) {
+                1 -> {
+                    nvgTranslate(vg, width.float / 2, height.float / 2)
+                    nvgRotate(vg, PI.float / 2)
+                    nvgTranslate(vg, -width.float / 2, -height.float / 2)
+                    drawAccarc(
+                        vg,
+                        0,
+                        0.0,
+                        0.0,
+                        height,
+                        width,
+                        lHeight,
+                        lWidth,
+                        borderRadius,
+                        lRadius,
+                        color,
+                    )
+                }
+                2 -> {
+                    nvgTranslate(vg, width.float / 2, height.float / 2)
+                    nvgRotate(vg, PI.float)
+                    nvgTranslate(vg, -width.float / 2, -height.float / 2)
+                    drawAccarc(
+                        vg,
+                        0,
+                        0.0,
+                        0.0,
+                        width,
+                        height,
+                        lWidth,
+                        lHeight,
+                        borderRadius,
+                        lRadius,
+                        color,
+                    )
+                }
+                3 -> {
+                    nvgTranslate(vg, width.float / 2, height.float / 2)
+                    nvgRotate(vg, -PI.float / 2)
+                    nvgTranslate(vg, -width.float / 2, -height.float / 2)
+                    drawAccarc(
+                        vg,
+                        0,
+                        0.0,
+                        0.0,
+                        height,
+                        width,
+                        lHeight,
+                        lWidth,
+                        borderRadius,
+                        lRadius,
+                        color,
+                    )
+                }
+            }
+        } else {
+            val w = width.float
+            val h = height.float
+            val lw = min(lWidth.float, w)
+            val lh = min(lHeight.float, h)
+            val br = minOf(borderRadius.float, lw / 2, lh / 2, w - lw, h - lh)
+            val lr = minOf(lRadius.float, w - lw, h - lh)
+
+            withscope {
+                val nvgColor = NVGColor.calloc().using().fill(color)
+
+                nvgBeginPath(vg)
+
+                nvgMoveTo(vg, br, 0F)
+                nvgLineTo(vg, w - br, 0F)
+                nvgArcTo(vg, w, 0F, w, br, br)
+                nvgLineTo(vg, w, lh - br)
+                nvgArcTo(vg, w, lh, w - br, lh, br)
+                nvgLineTo(vg, lw + lr, lh)
+                nvgArcTo(vg, lw, lh, lw, lh + lr, lr)
+                nvgLineTo(vg, lw, h - br)
+                nvgArcTo(vg, lw, h, lw - br, h, br)
+                nvgLineTo(vg, br, h)
+                nvgArcTo(vg, 0F, h, 0F, h - br, br)
+                nvgLineTo(vg, 0F, br)
+                nvgArcTo(vg, 0F, 0F, br, 0F, br)
+
+                nvgClosePath(vg)
+                nvgFillColor(vg, nvgColor)
+                nvgFill(vg)
+            }
+        }
+
+        nvgRestore(vg)
+    }
+
+    override fun drawTextSegments(
+        vg: Long,
+        segments: List<StyledSegment>,
+        x: Double,
+        y: Double,
+        size: Double,
+        font: Font,
+        anchor: Vec2D,
+        color: Int,
+        colorMultiplier: Double,
+        shadow: Pair<Vec2D, Double>?,
+    ) {
+        withscope {
+            shadow?.let {
+                drawTextSegments(
+                    vg,
+                    segments,
+                    x + shadow.first.x * size,
+                    y + shadow.first.y * size,
+                    size,
+                    font,
+                    anchor,
+                    color,
+                    colorMultiplier * shadow.second,
+                    null,
+                )
+            }
+            val nvgColor = NVGColor.calloc().using().fill(shadowColor(color, colorMultiplier))
+            nvgFontSize(vg, size.float)
+            nvgFontFace(vg, font.name)
+            val totalWidth = segments.sumOf { nvgTextBounds(vg, 0.0f, 0.0f, it.text, FloatArray(4)).double }
+            val posX = x - totalWidth * anchor.x
+            val posY = y - size * anchor.y
+            var currentX = posX
+            segments.forEach { (text, color) ->
+                nvgFillColor(vg, color?.let { NVGColor.calloc().using().fill(shadowColor(it, colorMultiplier)) } ?: nvgColor)
+                currentX = nvgText(vg, currentX.float, posY.float, text).double
+            }
+        }
+    }
+
+    override fun drawRoundedTexture(
+        vg: Long,
+        imageCache: NanoVGImageCacheEntry,
+        texture: Int,
+        imageXRel: Double,
+        imageYRel: Double,
+        imageWRel: Double,
+        imageHRel: Double,
+        x: Double,
+        y: Double,
+        width: Double,
+        height: Double,
+        alpha: Double,
+        radius: Double,
+    ) {
+        imageCache.cleanup(this, vg)
+
+        val nvgImage =
+            imageCache.cache.getOrPut(texture) {
+                nvglCreateImageFromHandle(vg, texture, 64, 64, NVG_IMAGE_NEAREST or NVG_IMAGE_NODELETE)
+                    .also { if (it == -1) return@drawRoundedTexture }
+            }
+
+        drawRoundedImage(
+            vg,
+            nvgImage,
+            0.0,
+            0.0,
+            1.0,
+            1.0,
+            x,
+            y,
+            width,
+            height,
+            alpha,
+            radius,
+        )
+    }
+
+    private fun shadowColor(
+        color: Int,
+        multiplier: Double,
+    ): Int {
+        val rgba = convertARGBToDoubleArray(color)
+        rgba[0] = rgba[0] * multiplier
+        rgba[1] = rgba[1] * multiplier
+        rgba[2] = rgba[2] * multiplier
+        return convertDoubleArrayToARGB(*rgba)
+    }
+
+    override fun save(vg: Long) {
+        nvgSave(vg)
+    }
+
+    override fun restore(vg: Long) {
+        nvgRestore(vg)
+    }
+
+    override fun translate(
+        vg: Long,
+        pos: Vec2D,
+    ) {
+        nvgTranslate(vg, pos.x.float, pos.y.float)
+    }
+
+    override fun scale(
+        vg: Long,
+        factor: Vec2D,
+    ) {
+        nvgScale(vg, factor.x.float, factor.y.float)
+    }
+
+    override fun rotate(
+        vg: Long,
+        angle: Double,
+    ) {
+        nvgRotate(vg, angle.float)
     }
 }

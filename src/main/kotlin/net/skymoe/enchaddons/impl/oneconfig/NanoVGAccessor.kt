@@ -1,6 +1,9 @@
 package net.skymoe.enchaddons.impl.oneconfig
 
 import cc.polyfrost.oneconfig.renderer.font.Font
+import net.skymoe.enchaddons.util.StyledSegment
+import net.skymoe.enchaddons.util.math.Vec2D
+import net.skymoe.enchaddons.util.math.int
 import net.skymoe.enchaddons.util.property.latelet
 
 var nvg: NanoVGAccessor by latelet()
@@ -128,5 +131,67 @@ interface NanoVGAccessor {
         height: Double,
         alpha: Double,
         radius: Double,
+    )
+
+    fun drawAccarc(
+        vg: Long,
+        lCorner: Int,
+        x: Double,
+        y: Double,
+        width: Double,
+        height: Double,
+        lWidth: Double,
+        lHeight: Double,
+        borderRadius: Double,
+        lRadius: Double,
+        color: Int,
+    )
+
+    fun drawTextSegments(
+        vg: Long,
+        segments: List<StyledSegment>,
+        x: Double,
+        y: Double,
+        size: Double,
+        font: Font,
+        anchor: Vec2D = Vec2D(0.0, 0.0),
+        color: Int = 0xFFFFFFFF.int,
+        colorMultiplier: Double = 1.0,
+        shadow: Pair<Vec2D, Double>? = null,
+    )
+
+    fun drawRoundedTexture(
+        vg: Long,
+        imageCache: NanoVGImageCacheEntry,
+        texture: Int,
+        imageXRel: Double,
+        imageYRel: Double,
+        imageWRel: Double,
+        imageHRel: Double,
+        x: Double,
+        y: Double,
+        width: Double,
+        height: Double,
+        alpha: Double,
+        radius: Double,
+    )
+
+    fun save(vg: Long)
+
+    fun restore(vg: Long)
+
+    fun translate(
+        vg: Long,
+        pos: Vec2D,
+    )
+
+    fun scale(
+        vg: Long,
+        factor: Vec2D,
+    )
+
+    fun rotate(
+        vg: Long,
+        angle: Double,
     )
 }

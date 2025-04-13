@@ -15,6 +15,7 @@ import net.skymoe.enchaddons.impl.api.APIImpl
 import net.skymoe.enchaddons.impl.cache.ResourceCacheImpl
 import net.skymoe.enchaddons.impl.config.EnchAddonsConfig
 import net.skymoe.enchaddons.impl.event.EventDispatcherImpl
+import net.skymoe.enchaddons.impl.feature.awesomemap.AwesomeMapHUD
 import net.skymoe.enchaddons.impl.feature.dynamickeybinding.DynamicKeyBindingHUD
 import net.skymoe.enchaddons.impl.feature.dynamicspot.DynamicSpotHUD
 import net.skymoe.enchaddons.impl.feature.invincibilitytimer.InvincibilityTimerHUD
@@ -74,6 +75,7 @@ class EnchAddonsImpl : EnchAddons {
         FastDraft
 
         AwesomeMap
+        AwesomeMapHUD
 
         eventDispatcher.register<MinecraftEvent.Load.Post> {
             loadHypixelModAPI
