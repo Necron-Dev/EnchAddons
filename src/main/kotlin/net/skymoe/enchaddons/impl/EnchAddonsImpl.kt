@@ -21,7 +21,13 @@ import net.skymoe.enchaddons.impl.feature.dynamicspot.DynamicSpotHUD
 import net.skymoe.enchaddons.impl.feature.invincibilitytimer.InvincibilityTimerHUD
 import net.skymoe.enchaddons.impl.feature.teamspeakconnect.TeamSpeakConnectHUD
 import net.skymoe.enchaddons.impl.hypixel.loadHypixelModAPI
+import net.skymoe.enchaddons.impl.nanovg.GUIEvent
+import net.skymoe.enchaddons.impl.nanovg.NanoVGUIContext
+import net.skymoe.enchaddons.impl.nanovg.Widget
+import net.skymoe.enchaddons.impl.oneconfig.fuckOneConfigFont
+import net.skymoe.enchaddons.impl.oneconfig.nvg
 import net.skymoe.enchaddons.theEA
+import net.skymoe.enchaddons.util.math.Vec2D
 import kotlin.reflect.KClass
 
 lateinit var theEAImpl: EnchAddonsImpl
@@ -51,6 +57,8 @@ class EnchAddonsImpl : EnchAddons {
 
     override var configVersion = 0
 
+    var fuckedOneConfig = false
+
     override fun <T : FeatureConfig> getConfigImpl(type: KClass<T>) = EnchAddonsConfig.getConfigImpl(type)
 
     init {
@@ -79,6 +87,27 @@ class EnchAddonsImpl : EnchAddons {
 
         eventDispatcher.register<MinecraftEvent.Load.Post> {
             loadHypixelModAPI
+        }
+
+        eventDispatcher.register<GUIEvent.HUD> { event ->
+            if (!fuckedOneConfig) {
+                object : Widget<Nothing> {
+                    override fun draw(context: NanoVGUIContext) {
+                        context.run {
+                            nvg.fuckOneConfigFont(vg)
+                        }
+                    }
+
+                    override fun alphaScale(alpha: Double): Nothing = throw IllegalStateException()
+
+                    override fun scale(
+                        scale: Double,
+                        origin: Vec2D,
+                    ): Nothing = throw IllegalStateException()
+                }.also(event.widgets::add)
+
+                fuckedOneConfig = true
+            }
         }
     }
 }
