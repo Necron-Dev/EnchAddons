@@ -1,16 +1,17 @@
 package net.skymoe.enchaddons.util.scope
 
+import java.lang.AutoCloseable
+
 class WithScopeContext(
     private val resourceList: MutableList<AutoCloseable>,
     private val cleanupList: MutableList<() -> Unit>,
 ) {
-    fun <T : AutoCloseable> use(resource: T): T {
-        return resource.also {
+    fun <T : AutoCloseable> use(resource: T): T =
+        resource.also {
             if (resource !in resourceList) {
                 resourceList.add(it)
             }
         }
-    }
 
     fun use(cleanup: () -> Unit) {
         if (cleanup !in cleanupList) {
