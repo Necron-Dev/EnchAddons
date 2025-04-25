@@ -1,6 +1,8 @@
 package net.skymoe.enchaddons.impl.feature.awesomemap
 
 import net.skymoe.enchaddons.feature.awesomemap.AwesomeMap
+import net.skymoe.enchaddons.feature.ensureEnabled
+import net.skymoe.enchaddons.feature.ensureSkyBlockMode
 import net.skymoe.enchaddons.impl.config.feature.AwesomeMapConfigImpl
 import net.skymoe.enchaddons.impl.hud.FeatureHUDBase
 import net.skymoe.enchaddons.impl.nanovg.Transformation
@@ -15,6 +17,9 @@ object AwesomeMapHUD : FeatureHUDBase<AwesomeMapConfigImpl, AwesomeMap>(AwesomeM
     private val cache = NanoVGImageCache()
 
     override fun ensureShow() {
+        ensureEnabled()
+        ensureSkyBlockMode("dungeon")
+        ensureHUDEnabled()
     }
 
     override fun reset() {

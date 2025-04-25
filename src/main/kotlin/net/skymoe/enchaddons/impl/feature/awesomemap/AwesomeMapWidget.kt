@@ -2,6 +2,7 @@ package net.skymoe.enchaddons.impl.feature.awesomemap
 
 import net.minecraft.util.ResourceLocation
 import net.skymoe.enchaddons.feature.awesomemap.AwesomeMap
+import net.skymoe.enchaddons.impl.config.EnchAddonsConfig
 import net.skymoe.enchaddons.impl.feature.awesomemap.core.DungeonPlayer
 import net.skymoe.enchaddons.impl.feature.awesomemap.core.map.*
 import net.skymoe.enchaddons.impl.feature.awesomemap.features.dungeon.Dungeon
@@ -20,49 +21,118 @@ import net.skymoe.enchaddons.impl.nanovg.Transformation
 import net.skymoe.enchaddons.impl.nanovg.Widget
 import net.skymoe.enchaddons.impl.oneconfig.NanoVGImageCache
 import net.skymoe.enchaddons.impl.oneconfig.fontMedium
+import net.skymoe.enchaddons.impl.oneconfig.fontSemiBold
 import net.skymoe.enchaddons.impl.oneconfig.loadFonts
 import net.skymoe.enchaddons.impl.oneconfig.nvg
 import net.skymoe.enchaddons.util.MC
+import net.skymoe.enchaddons.util.alphaScale
 import net.skymoe.enchaddons.util.math.Vec2D
 import net.skymoe.enchaddons.util.math.double
 import net.skymoe.enchaddons.util.math.float
+import net.skymoe.enchaddons.util.math.int
+import net.skymoe.enchaddons.util.math.lerp
 import net.skymoe.enchaddons.util.toStyledSegments
 import kotlin.math.PI
 
-class AwesomeMapWidget(
+data class AwesomeMapWidget(
     private val cache: NanoVGImageCache,
     private val pos: Vec2D,
-    private val scale: Double,
+    private val mapScale: Double,
+    private val mapAlpha: Double = 1.0,
 ) : Widget<AwesomeMapWidget> {
     override fun draw(context: NanoVGUIContext) {
-//        if (AwesomeMap.config.mapRotate) {
-//            GlStateManager.pushMatrix()
-//            setupRotate()
-//        } else if (AwesomeMap.config.mapDynamicRotate) {
-//            GlStateManager.translate(64.0, 64.0, 0.0)
-//            GlStateManager.rotate(dynamicRotation, 0f, 0f, 1f)
-//            GlStateManager.translate(-64.0, -64.0, 0.0)
+        context.run {
+            if (AwesomeMap.config.mapCenter) {
+                nvg.save(vg)
+                nvg.translate(
+                    vg,
+                    Vec2D(
+                        -(
+                            (MC.thePlayer.posX - DungeonScan.START_X + 15) * MapUtils.coordMultiplier +
+                                MapUtils.startCorner.first -
+                                2
+                        ),
+                        -(
+                            (MC.thePlayer.posZ - DungeonScan.START_Z + 15) * MapUtils.coordMultiplier +
+                                MapUtils.startCorner.second -
+                                2
+                        ),
+                    ) * mapScale,
+                )
+            }
+
+            if (AwesomeMap.config.mapRotate) {
+                nvg.save(vg)
+                nvg.translate(vg, Vec2D(pos.x + 64.0 * mapScale, pos.y + 64.0 * mapScale))
+
+                nvg.rotate(vg, (-MC.thePlayer.rotationYaw + 180.0) * PI / 180.0)
+            }
+        }
+
+//        if (AwesomeMap.config.mapRotate || AwesomeMap.config.mapDynamicRotate) {
+//            context.run {
+//                nvg.save(vg)
+//                nvg.translate(vg, Vec2D(pos.x + 64.0, pos.y + 64.0))
+//                if (AwesomeMap.config.mapDynamicRotate) {
+//                    nvg.rotate(vg, -MapRender.dynamicRotation * PI / 180.0)
+//                } else {
+//                    nvg.rotate(vg, (-MC.thePlayer.rotationYaw + 180.0) * PI / 180.0)
+//                }
+//                if (AwesomeMap.config.mapCenter) {
+//                    nvg.translate(
+//                        vg,
+//                        Vec2D(
+//                            -((MC.thePlayer.posX - DungeonScan.START_X + 15) * MapUtils.coordMultiplier + MapUtils.startCorner.first - 2),
+//                            -((MC.thePlayer.posZ - DungeonScan.START_Z + 15) * MapUtils.coordMultiplier + MapUtils.startCorner.second - 2),
+//                        ),
+//                    )
+//                } else {
+//                    nvg.translate(vg, Vec2D(-64.0, -64.0))
+//                }
+//            }
 //        }
 
-        val tr = (Transformation() + pos) * scale
+        val tr = (Transformation() + pos) * mapScale
         context.run {
+            if (AwesomeMap.config.mapRotate) {
+                nvg.translate(vg, Vec2D(-pos.x - 64.0 * mapScale, -pos.y - 64.0 * mapScale))
+            }
+
+            if (AwesomeMap.config.mapCenter) {
+                nvg.translate(
+                    vg,
+                    Vec2D(
+                        (
+                            (MC.thePlayer.posX - DungeonScan.START_X + 15) * MapUtils.coordMultiplier +
+                                MapUtils.startCorner.first -
+                                2
+                        ),
+                        (
+                            (MC.thePlayer.posZ - DungeonScan.START_Z + 15) * MapUtils.coordMultiplier +
+                                MapUtils.startCorner.second -
+                                2
+                        ),
+                    ) * mapScale,
+                )
+            }
+
             drawMap(tr)
             if (!Location.inBoss) {
                 drawPlayerHeads(tr)
             }
+
+            if (AwesomeMap.config.mapRotate) {
+                nvg.restore(vg)
+            }
+
+            if (AwesomeMap.config.mapCenter) {
+                nvg.restore(vg)
+            }
+
             if (AwesomeMap.config.mapShowRunInformation) {
                 drawRunInfo(tr)
             }
         }
-
-//        if (AwesomeMap.config.mapRotate) {
-//            GL11.glDisable(GL11.GL_SCISSOR_TEST)
-//            GlStateManager.popMatrix()
-//        } else if (AwesomeMap.config.mapDynamicRotate) {
-//            GlStateManager.translate(64.0, 64.0, 0.0)
-//            GlStateManager.rotate(-dynamicRotation, 0f, 0f, 1f)
-//            GlStateManager.translate(-64.0, -64.0, 0.0)
-//        }
     }
 
     //    fun setupRotate() {
@@ -155,7 +225,7 @@ class AwesomeMapWidget(
                     } else {
                         AwesomeMap.config.colorTextCleared
                     }
-                ).rgb
+                ).rgb alphaScale mapAlpha
 
 //            if (AwesomeMap.config.mapRotate) {
 //                GlStateManager.rotate(MC.thePlayer.rotationYaw + 180f, 0f, 0f, 1f)
@@ -209,9 +279,9 @@ class AwesomeMapWidget(
                     vg,
                     it.toStyledSegments(),
                     ttr posX (xOffsetName + MapUtils.halfRoomSize).double,
-                    ttr posY (yOffsetName + MapUtils.halfRoomSize).double - size * name.size / 2 + size * (i + 0.875),
+                    ttr posY (yOffsetName + MapUtils.halfRoomSize).double - size * name.size / 2 + size * (i + 0.5),
                     ttr size size,
-                    fontMedium(),
+                    fontSemiBold(),
                     color = color,
                     anchor = Vec2D(0.5, 0.0),
                 )
@@ -239,7 +309,7 @@ class AwesomeMapWidget(
                 color = color.grayScale()
             }
         }
-        return color.rgb
+        return color.rgb alphaScale mapAlpha
     }
 
     private fun NanoVGUIContext.drawPlayerHeads(tr: Transformation) {
@@ -304,7 +374,7 @@ class AwesomeMapWidget(
                     ttr posY -6.0,
                     ttr size 12.0,
                     ttr size 12.0,
-                    1.0,
+                    mapAlpha,
                     ttr size 0.0,
                 )
             } else {
@@ -320,8 +390,8 @@ class AwesomeMapWidget(
                     ttr posY -6.0,
                     ttr size 12.0,
                     ttr size 12.0,
-                    1.0,
-                    ttr size 2.0, // TODO
+                    mapAlpha,
+                    ttr size EnchAddonsConfig.dungeonConfig.awesomeMapConfig.playerHeadRadius.double,
                 )
             }
 
@@ -334,19 +404,26 @@ class AwesomeMapWidget(
                     "HAUNT_ABILITY",
                 )
             ) {
-//                if (!AwesomeMap.config.mapRotate) {
-//                    GlStateManager.rotate(-player.yaw + 180f, 0f, 0f, 1f)
-//                }
+                if (!AwesomeMap.config.mapRotate) {
+                    nvg.save(vg)
+                    nvg.rotate(vg, (-player.yaw + 180.0) * PI / 180.0)
+                }
+
                 nvg.drawTextSegments(
                     vg,
                     name.toStyledSegments(),
                     ttr posX 0.0,
-                    ttr posY 10.0,
+                    ttr posY 12.0,
                     ttr size 8.0 * AwesomeMap.config.playerNameScale,
-                    fontMedium(),
+                    fontSemiBold(),
+                    color = 0xFFFFFFFF.int alphaScale mapAlpha,
                     anchor = Vec2D(0.5, 0.0),
                     shadow = Vec2D(1 / 16.0, 1 / 16.0) to 0.25,
                 )
+
+                if (!AwesomeMap.config.mapRotate) {
+                    nvg.restore(vg)
+                }
             }
         } catch (e: Exception) {
             e.printStackTrace()
@@ -366,7 +443,8 @@ class AwesomeMapWidget(
             ttr posX 0.0,
             ttr posY 0.0,
             ttr size 8.0,
-            fontMedium(),
+            fontSemiBold(),
+            color = 0xFFFFFFFF.int alphaScale mapAlpha,
             anchor = Vec2D(0.5, 0.0),
             shadow = Vec2D(1 / 16.0, 1 / 16.0) to 0.25,
         )
@@ -376,16 +454,24 @@ class AwesomeMapWidget(
             ttr posX 0.0,
             ttr posY 9.0,
             ttr size 8.0,
-            fontMedium(),
+            fontSemiBold(),
+            color = 0xFFFFFFFF.int alphaScale mapAlpha,
             anchor = Vec2D(0.5, 0.0),
             shadow = Vec2D(1 / 16.0, 1 / 16.0) to 0.25,
         )
     }
 
-    override fun alphaScale(alpha: Double): AwesomeMapWidget = this // TODO
+    override fun alphaScale(alpha: Double): AwesomeMapWidget =
+        copy(
+            mapAlpha = alpha,
+        )
 
     override fun scale(
         scale: Double,
         origin: Vec2D,
-    ): AwesomeMapWidget = this // TODO
+    ): AwesomeMapWidget =
+        copy(
+            pos = lerp(origin, pos, scale),
+            mapScale = mapScale * scale,
+        )
 }
