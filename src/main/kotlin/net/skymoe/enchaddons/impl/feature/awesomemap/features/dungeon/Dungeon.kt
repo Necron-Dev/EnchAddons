@@ -11,7 +11,9 @@ import net.skymoe.enchaddons.impl.feature.awesomemap.utils.Location
 import net.skymoe.enchaddons.impl.feature.awesomemap.utils.MapUtils
 import net.skymoe.enchaddons.impl.feature.awesomemap.utils.TabList
 import net.skymoe.enchaddons.impl.feature.awesomemap.utils.Utils.equalsOneOf
-import net.skymoe.enchaddons.util.printChat
+import net.skymoe.enchaddons.util.LogLevel
+import net.skymoe.enchaddons.util.buildComponent
+import net.skymoe.enchaddons.util.modMessage
 
 object Dungeon {
     val dungeonTeammates = mutableMapOf<String, DungeonPlayer>()
@@ -31,7 +33,12 @@ object Dungeon {
     fun onTick() {
         if (shouldSearchMimic()) {
             MimicDetector.findMimic()?.let {
-                if (AwesomeMap.config.scanChatInfo) printChat("&7Mimic Room: &c$it")
+                if (AwesomeMap.config.scanChatInfo) {
+                    buildComponent {
+                        "Mimic Room: ".gray
+                        it.red
+                    }.also { component -> modMessage(component, LogLevel.INFO) }
+                }
                 Info.mimicFound = true
             }
         }
@@ -56,7 +63,6 @@ object Dungeon {
         }
 
         if (DungeonScan.shouldScan) {
-//            AwesomeMap.scope.launch { DungeonScan.scan() }
             DungeonScan.scan()
         }
     }
