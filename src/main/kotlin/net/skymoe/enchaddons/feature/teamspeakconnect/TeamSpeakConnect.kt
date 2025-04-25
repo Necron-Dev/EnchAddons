@@ -4,6 +4,7 @@ import kotlinx.atomicfu.*
 import kotlinx.coroutines.CompletableJob
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.IO
 import kotlinx.coroutines.SupervisorJob
 import net.skymoe.enchaddons.event.RegistryEventDispatcher
 import net.skymoe.enchaddons.event.minecraft.MinecraftEvent
@@ -11,7 +12,6 @@ import net.skymoe.enchaddons.event.register
 import net.skymoe.enchaddons.feature.FeatureBase
 import net.skymoe.enchaddons.feature.featureInfo
 import net.skymoe.enchaddons.feature.teamspeakconnect.wrapper.*
-import net.skymoe.enchaddons.getLogger
 import net.skymoe.enchaddons.impl.MOD_ID
 import net.skymoe.enchaddons.impl.MOD_NAME
 import net.skymoe.enchaddons.impl.MOD_VERSION
@@ -19,8 +19,6 @@ import net.skymoe.enchaddons.util.property.versionedLazy
 import net.skymoe.enchaddons.util.tickCounter
 
 val TEAMSPEAK_CONNECT_INFO = featureInfo<TeamSpeakConnectConfig>("teamspeak_connect", "TeamSpeak Connect")
-
-val logger = getLogger("TeamSpeak Connect")
 
 object TeamSpeakConnect : FeatureBase<TeamSpeakConnectConfig>(TEAMSPEAK_CONNECT_INFO) {
     private var tsRemote: TeamSpeakRemoteAppWrapper? = null
