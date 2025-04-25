@@ -9,6 +9,7 @@ import net.skymoe.enchaddons.impl.feature.awesomemap.utils.Location.dungeonFloor
 import net.skymoe.enchaddons.impl.feature.awesomemap.utils.Utils.equalsOneOf
 import net.skymoe.enchaddons.util.LogLevel
 import net.skymoe.enchaddons.util.MC
+import net.skymoe.enchaddons.util.buildComponent
 import net.skymoe.enchaddons.util.modMessage
 import kotlin.math.ceil
 
@@ -92,21 +93,29 @@ object DungeonScan {
                 if (ScoreCalculation.paul) maxBonus += 10
                 val minSecrets = ceil(maxSecrets * (40 - maxBonus) / 40).toInt()
 
-                val lines =
-                    mutableListOf(
-                        "&aScan Finished!",
-                        "&aPuzzles (&c${Dungeon.Info.puzzles.size}&a):",
-                        Dungeon.Info.puzzles.entries.joinToString(
-                            separator = "\n&b- &d",
-                            prefix = "&b- &d",
-                        ) { it.key.roomDataName },
-                        "&6Trap: &a${Dungeon.Info.trapType}",
-                        "&8Wither Doors: &7${Dungeon.Info.witherDoors - 1}",
-                        "&7Total Crypts: &6${Dungeon.Info.cryptCount}",
-                        "&7Total Secrets: &b${Dungeon.Info.secretCount}",
-                        "&7Minimum Secrets: &e$minSecrets",
-                    )
-                modMessage(lines.joinToString(separator = "\n"), LogLevel.INFO)
+                buildComponent {
+                    "Scan Finished!\n".green
+                    "Puzzles (".green
+                    "${Dungeon.Info.puzzles.size}"
+                        .red
+                    "):".green
+                    Dungeon.Info.puzzles.entries.forEach { puzzle ->
+                        "\n- ".aqua
+                        puzzle.key.roomDataName.lightPurple
+                    }
+                    "\nTrap: ".gold
+                    Dungeon.Info.trapType.green
+                    "\nWither Doors: ".darkGray
+                    "${Dungeon.Info.witherDoors - 1}".gray
+                    "\nTotal Crypts: ".gray
+                    "${Dungeon.Info.cryptCount}".gold
+                    "\nTotal Secrets: ".gray
+                    "${Dungeon.Info.secretCount}".aqua
+                    "\nMinimum Secrets: ".gray
+                    "$minSecrets".yellow
+                }.also {
+                    modMessage(it, LogLevel.INFO)
+                }
             }
             Dungeon.Info.roomCount =
                 Dungeon.Info.dungeonList
