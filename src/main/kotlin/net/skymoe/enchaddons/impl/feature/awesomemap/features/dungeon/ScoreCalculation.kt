@@ -1,14 +1,14 @@
 package net.skymoe.enchaddons.impl.feature.awesomemap.features.dungeon
 
+import net.skymoe.enchaddons.api.Template
+import net.skymoe.enchaddons.api.setDefault
 import net.skymoe.enchaddons.feature.awesomemap.AwesomeMap
+import net.skymoe.enchaddons.feature.config.invoke
 import net.skymoe.enchaddons.impl.feature.awesomemap.features.dungeon.RunInformation.completedRoomsPercentage
 import net.skymoe.enchaddons.impl.feature.awesomemap.features.dungeon.RunInformation.mimicKilled
 import net.skymoe.enchaddons.impl.feature.awesomemap.features.dungeon.RunInformation.secretPercentage
 import net.skymoe.enchaddons.impl.feature.awesomemap.utils.APIUtils
 import net.skymoe.enchaddons.impl.feature.awesomemap.utils.Location
-import net.skymoe.enchaddons.util.LogLevel
-import net.skymoe.enchaddons.util.MC
-import net.skymoe.enchaddons.util.modMessage
 import kotlin.math.roundToInt
 import kotlin.time.DurationUnit
 import kotlin.time.toDuration
@@ -20,31 +20,20 @@ object ScoreCalculation {
     var message300 = false
     var message270 = false
 
+    fun setPlaceholders(template: Template) {
+        template.setDefault()
+        template["time"] = RunInformation.timeElapsed.toDuration(DurationUnit.SECONDS)
+    }
+
     fun updateScore() {
         score = getSkillScore() + getExplorationScore() + getSpeedScore(RunInformation.timeElapsed) + getBonusScore()
         if (score >= 300 && !message300) {
             message300 = true
             message270 = true
-            if (AwesomeMap.config.scoreMessage != 0) {
-                // TODO 300 MESSAGE
-//                UChat.say("/pc ${AwesomeMap.config.message300}")
-            }
-            if (AwesomeMap.config.scoreTitle != 0) {
-                MC.thePlayer.playSound("random.orb", 1f, 0.5.toFloat())
-//                GuiRenderer.displayTitle(AwesomeMap.config.message300, 40) TODO
-            }
-            if (AwesomeMap.config.timeTo300) {
-                modMessage("§3300 Score§7: §a${RunInformation.timeElapsed.toDuration(DurationUnit.SECONDS)}", LogLevel.INFO)
-            }
+            AwesomeMap.config.notification.onScore300(AwesomeMap.logger, ::setPlaceholders)
         } else if (score >= 270 && !message270) {
             message270 = true
-            if (AwesomeMap.config.scoreMessage == 2) {
-//                UChat.say("/pc ${AwesomeMap.config.message270}")
-            }
-            if (AwesomeMap.config.scoreTitle == 2) {
-                MC.thePlayer.playSound("random.orb", 1f, 0.5.toFloat())
-//                GuiRenderer.displayTitle(AwesomeMap.config.message270, 40) TODO
-            }
+            AwesomeMap.config.notification.onScore270(AwesomeMap.logger, ::setPlaceholders)
         }
     }
 
