@@ -11,6 +11,7 @@ import net.skymoe.enchaddons.util.convertDoubleArrayToARGB
 import net.skymoe.enchaddons.util.math.Vec2D
 import net.skymoe.enchaddons.util.math.double
 import net.skymoe.enchaddons.util.math.float
+import net.skymoe.enchaddons.util.math.int
 import net.skymoe.enchaddons.util.scope.withscope
 import net.skymoe.enchaddons.util.toBuffer
 import org.lwjgl.nanovg.NVGColor
@@ -51,6 +52,14 @@ object NanoVGAccessorImpl : NanoVGAccessor {
         return object : Font(fontFace, "") {
             val byteArray = byteBuffer
         }
+    }
+
+    override fun setFallbackFont(
+        vg: Long,
+        base: Font,
+        fallback: Font,
+    ) {
+        nvgAddFallbackFont(vg, base.name, fallback.name)
     }
 
     override fun deleteImages(
@@ -496,6 +505,7 @@ object NanoVGAccessorImpl : NanoVGAccessor {
                     null,
                 )
             }
+            val alphaBits = (color and 0xFF000000.int) or 0xFFFFFF
             val nvgColor = NVGColor.calloc().using().fill(shadowColor(color, colorMultiplier))
             nvgFontSize(vg, size.float)
             nvgFontFace(vg, font.name)
@@ -504,7 +514,13 @@ object NanoVGAccessorImpl : NanoVGAccessor {
             val posY = y - size * anchor.y
             var currentX = posX
             segments.forEach { (text, color) ->
-                nvgFillColor(vg, color?.let { NVGColor.calloc().using().fill(shadowColor(it, colorMultiplier)) } ?: nvgColor)
+                nvgFillColor(
+                    vg,
+                    color?.let {
+                        val colorWithAlpha = color and alphaBits
+                        NVGColor.calloc().using().fill(shadowColor(colorWithAlpha, colorMultiplier))
+                    } ?: nvgColor,
+                )
                 currentX = nvgText(vg, currentX.float, posY.float, text).double
             }
         }

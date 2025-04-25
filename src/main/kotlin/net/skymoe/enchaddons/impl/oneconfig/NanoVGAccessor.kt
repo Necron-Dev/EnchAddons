@@ -1,6 +1,7 @@
 package net.skymoe.enchaddons.impl.oneconfig
 
 import cc.polyfrost.oneconfig.renderer.font.Font
+import cc.polyfrost.oneconfig.renderer.font.Fonts
 import net.skymoe.enchaddons.util.StyledSegment
 import net.skymoe.enchaddons.util.math.Vec2D
 import net.skymoe.enchaddons.util.math.int
@@ -8,18 +9,45 @@ import net.skymoe.enchaddons.util.property.latelet
 
 var nvg: NanoVGAccessor by latelet()
 
+private var fallbackFontLoaded = false
 private var fontLoaded = false
 
+var fontFallbackInstance: Font by latelet()
 var fontMediumInstance: Font by latelet()
 var fontSemiBoldInstance: Font by latelet()
 
 val fontMedium = { fontMediumInstance }
 val fontSemiBold = { fontSemiBoldInstance }
 
+fun NanoVGAccessor.fuckOneConfigFont(vg: Long) {
+    if (!fallbackFontLoaded) {
+        fontFallbackInstance = loadFont(vg, "notosanssc/medium.ttf")
+        fallbackFontLoaded = true
+    }
+
+    listOf<Font>(
+        Fonts.BOLD,
+        Fonts.SEMIBOLD,
+        Fonts.REGULAR,
+        Fonts.MEDIUM,
+        Fonts.MINECRAFT_BOLD,
+        Fonts.MINECRAFT_REGULAR,
+    ).forEach { font ->
+        setFallbackFont(vg, font, fontFallbackInstance)
+    }
+}
+
 fun NanoVGAccessor.loadFonts(vg: Long) {
+    if (!fallbackFontLoaded) {
+        fontFallbackInstance = loadFont(vg, "notosanssc/medium.ttf")
+        fallbackFontLoaded = true
+    }
+
     if (!fontLoaded) {
         fontMediumInstance = loadFont(vg, "montserrat/medium.ttf")
+        setFallbackFont(vg, fontMediumInstance, fontFallbackInstance)
         fontSemiBoldInstance = loadFont(vg, "montserrat/semibold.ttf")
+        setFallbackFont(vg, fontSemiBoldInstance, fontFallbackInstance)
         fontLoaded = true
     }
 }
@@ -68,6 +96,12 @@ interface NanoVGAccessor {
         vg: Long,
         name: String,
     ): Font
+
+    fun setFallbackFont(
+        vg: Long,
+        base: Font,
+        fallback: Font,
+    )
 
     fun loadImageFromByteArray(
         vg: Long,
