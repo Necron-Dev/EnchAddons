@@ -1,5 +1,6 @@
 package net.skymoe.enchaddons.impl.feature.awesomemap
 
+import net.skymoe.enchaddons.impl.config.EnchAddonsConfig
 import net.skymoe.enchaddons.impl.feature.awesomemap.utils.MapUtils
 import net.skymoe.enchaddons.impl.nanovg.NanoVGUIContext
 import net.skymoe.enchaddons.impl.nanovg.Transformation
@@ -28,8 +29,8 @@ data class LRoomShape(
                 tr size height.double * (MapUtils.roomSize + MapUtils.connectorSize) - MapUtils.connectorSize,
                 tr size MapUtils.roomSize.double,
                 tr size MapUtils.roomSize.double,
-                tr size 4.0, // TODO
-                tr size 2.0, // TODO
+                tr size EnchAddonsConfig.dungeonConfig.awesomeMapConfig.mapRoomRadius.double,
+                tr size EnchAddonsConfig.dungeonConfig.awesomeMapConfig.mapLShapeRoomInnerRadius.double,
                 color,
             )
         }

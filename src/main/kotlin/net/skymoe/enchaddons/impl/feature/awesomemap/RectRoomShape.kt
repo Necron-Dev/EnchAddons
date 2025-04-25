@@ -1,5 +1,6 @@
 package net.skymoe.enchaddons.impl.feature.awesomemap
 
+import net.skymoe.enchaddons.impl.config.EnchAddonsConfig
 import net.skymoe.enchaddons.impl.feature.awesomemap.utils.MapUtils
 import net.skymoe.enchaddons.impl.nanovg.NanoVGUIContext
 import net.skymoe.enchaddons.impl.nanovg.Transformation
@@ -25,7 +26,7 @@ data class RectRoomShape(
                 (tr size width.double * (MapUtils.roomSize + MapUtils.connectorSize) - MapUtils.connectorSize).float,
                 (tr size height.double * (MapUtils.roomSize + MapUtils.connectorSize) - MapUtils.connectorSize).float,
                 color,
-                (tr size 4.0).float, // TODO
+                (tr size EnchAddonsConfig.dungeonConfig.awesomeMapConfig.mapRoomRadius.double).float,
             )
         }
     }
