@@ -82,7 +82,7 @@ class ScoreElement {
                     ScoreCalculation.score < 300 -> "§e"
                     else -> "§a"
                 }
-            var line = if (minimized) "" else "§7Score: "
+            var line = if (minimized) "" else "§7分数: "
             if (expanded) {
                 line += "§b${ScoreCalculation.getSkillScore()}§7/" +
                     "§a${ScoreCalculation.getExplorationScore()}§7/" +
@@ -98,7 +98,7 @@ class ScoreElement {
             minimized: Boolean = false,
             missing: Boolean,
         ): String {
-            var line = if (minimized) "" else "§7Secrets: "
+            var line = if (minimized) "" else "§7秘密: "
             line += "§b${RunInformation.secretsFound}§7/"
             if (missing) {
                 val missingSecrets = (RunInformation.minSecrets - RunInformation.secretsFound).coerceAtLeast(0)
@@ -110,7 +110,7 @@ class ScoreElement {
         }
 
         private fun getCrypts(minimized: Boolean = false): String {
-            var line = if (minimized) "§7C: " else "§7Crypts: "
+            var line = if (minimized) "§7C: " else "§7坟: "
             line += if (RunInformation.cryptsCount >= 5) "§a${RunInformation.cryptsCount}" else "§c${RunInformation.cryptsCount}"
             return line
         }
@@ -122,7 +122,7 @@ class ScoreElement {
         }
 
         private fun getDeaths(minimized: Boolean = false): String {
-            var line = if (minimized) "§7D: " else "§7Deaths: "
+            var line = if (minimized) "§7D: " else "§7死亡: "
             line += "§c${RunInformation.deathCount}"
             return line
         }
