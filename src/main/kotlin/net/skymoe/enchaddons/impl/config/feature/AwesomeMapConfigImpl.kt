@@ -5,10 +5,12 @@ import cc.polyfrost.oneconfig.config.annotations.Number
 import cc.polyfrost.oneconfig.config.core.OneColor
 import net.skymoe.enchaddons.feature.awesomemap.AWESOME_MAP_INFO
 import net.skymoe.enchaddons.feature.awesomemap.AwesomeMapConfig
+import net.skymoe.enchaddons.feature.awesomemap.Notification
 import net.skymoe.enchaddons.impl.config.AdvancedHUD
 import net.skymoe.enchaddons.impl.config.ConfigImpl
 import net.skymoe.enchaddons.impl.config.adapter.Extract
 import net.skymoe.enchaddons.impl.config.gui.GUIBackground
+import net.skymoe.enchaddons.impl.config.impl.NotificationOptionImpl
 
 class AwesomeMapConfigImpl :
     ConfigImpl(AWESOME_MAP_INFO),
@@ -29,57 +31,48 @@ class AwesomeMapConfigImpl :
     )
     override var scanChatInfo = true
 
-    @Button(
-        name = "Map Position",
-        category = "General",
-        subcategory = "Size",
-        text = "Edit",
-    )
-    fun openMoveMapGui() {
-//        AwesomeMap.display = EditLocationGui()
-    }
-
-    @Button(
-        name = "Reset Map Position",
-        category = "General",
-        subcategory = "Size",
-        text = "Reset",
-    )
-    fun resetMapLocation() {
-        mapX = 10
-        mapY = 10
-    }
-
     @Switch(
-        name = "Legit Mode",
+        name = "Enabled",
         description = "Hides unopened rooms. Still uses scanning to identify all rooms.",
         category = "General",
         subcategory = "Legit Mode",
     )
     override var legitMode = false
 
-    @Dropdown(
-        name = "Peek Mode",
-        description = "Shows cheater map while in legit mode.",
-        options = ["Toggle", "Hold"],
-        category = "General",
-        subcategory = "Legit Mode",
-    )
-    override var peekMode = 0
-
-    @Switch(
-        name = "Map Enabled",
-        description = "Render the map!",
+    @HUD(
+        name = "Map",
         category = "Map",
-        subcategory = "Toggle",
     )
-    override var mapEnabled = true
+    var hud = AdvancedHUD()
+
+    @Extract(
+        category = "Map",
+    )
+    var background = GUIBackground()
+
+    @Number(
+        name = "Room Radius",
+        category = "Map",
+        subcategory = "Room Render",
+        min = 0F,
+        max = 10F,
+    )
+    var mapRoomRadius = 4.0f
+
+    @Number(
+        name = "L-Shape Room Inner Radius",
+        category = "Map",
+        subcategory = "Room Render",
+        min = 0F,
+        max = 10F,
+    )
+    var mapLShapeRoomInnerRadius = 2.0f
 
     @Switch(
         name = "Rotate Map",
         description = "Rotates map to follow the player.",
         category = "Map",
-        subcategory = "Toggle",
+        subcategory = "Tweaks",
     )
     override var mapRotate = false
 
@@ -87,7 +80,7 @@ class AwesomeMapConfigImpl :
         name = "Center Map",
         description = "Centers the map on the player if Rotate Map is enabled.",
         category = "Map",
-        subcategory = "Toggle",
+        subcategory = "Tweaks",
     )
     override var mapCenter = false
 
@@ -95,7 +88,7 @@ class AwesomeMapConfigImpl :
         name = "Dynamic Rotate",
         description = "Keeps the entrance room at the bottom. Does not work with rotate map.",
         category = "Map",
-        subcategory = "Toggle",
+        subcategory = "Tweaks",
     )
     override var mapDynamicRotate = false
 
@@ -103,7 +96,7 @@ class AwesomeMapConfigImpl :
         name = "Hide In Boss",
         description = "Hides the map in boss.",
         category = "Map",
-        subcategory = "Toggle",
+        subcategory = "Tweaks",
     )
     override var mapHideInBoss = false
 
@@ -111,7 +104,7 @@ class AwesomeMapConfigImpl :
         name = "Show Player Names",
         description = "Show player name under player head",
         category = "Map",
-        subcategory = "Toggle",
+        subcategory = "Tweaks",
         options = ["Off", "Holding Leap", "Always"],
     )
     override var playerHeads = 0
@@ -120,36 +113,9 @@ class AwesomeMapConfigImpl :
         name = "Vanilla Head Marker",
         description = "Uses the vanilla head marker for yourself.",
         category = "Map",
-        subcategory = "Toggle",
+        subcategory = "Tweaks",
     )
     override var mapVanillaMarker = false
-
-    @Number(
-        name = "Map X",
-        category = "Map",
-        subcategory = "Size",
-        min = 0F,
-        max = 1000F,
-    )
-    override var mapX = 10
-
-    @Number(
-        name = "Map Y",
-        category = "Map",
-        subcategory = "Size",
-        min = 0F,
-        max = 1000F,
-    )
-    override var mapY = 10
-
-    @Slider(
-        name = "Map Size",
-        category = "Map",
-        subcategory = "Size",
-        min = 0.1F,
-        max = 4F,
-    )
-    override var mapScale = 1.25f
 
     @Slider(
         name = "Map Text Scale",
@@ -172,6 +138,16 @@ class AwesomeMapConfigImpl :
     override var playerHeadScale = 1f
 
     @Slider(
+        name = "Player Heads Radius",
+        description = "Radius of player heads.",
+        category = "Map",
+        subcategory = "Size",
+        min = 0F,
+        max = 10F,
+    )
+    var playerHeadRadius = 2.0f
+
+    @Slider(
         name = "Player Name Scale",
         description = "Scale of player names relative to head size.",
         category = "Map",
@@ -180,31 +156,6 @@ class AwesomeMapConfigImpl :
         max = 2F,
     )
     override var playerNameScale = .8f
-
-    @Color(
-        name = "Map Background Color",
-        category = "Map",
-        subcategory = "Render",
-        allowAlpha = true,
-    )
-    override var mapBackground = OneColor(0, 0, 0, 100)
-
-    @Color(
-        name = "Map Border Color",
-        category = "Map",
-        subcategory = "Render",
-        allowAlpha = true,
-    )
-    override var mapBorder = OneColor(0, 0, 0, 255)
-
-    @Slider(
-        name = "Border Thickness",
-        category = "Map",
-        subcategory = "Render",
-        min = 0F,
-        max = 10F,
-    )
-    override var mapBorderWidth = 3f
 
     @Switch(
         name = "Dark Undiscovered Rooms",
@@ -546,45 +497,6 @@ class AwesomeMapConfigImpl :
     )
     override var scorePuzzles = 0
 
-    @Dropdown(
-        name = "Score Messages",
-        category = "Score",
-        subcategory = "Message",
-        options = ["Off", "300", "270 and 300"],
-    )
-    override var scoreMessage = 0
-
-    @Dropdown(
-        name = "Score Title",
-        description = "Shows score messages as a title notification.",
-        category = "Score",
-        subcategory = "Message",
-        options = ["Off", "300", "270 and 300"],
-    )
-    override var scoreTitle = 0
-
-    @Text(
-        name = "270 Message",
-        category = "Score",
-        subcategory = "Message",
-    )
-    override var message270 = "270 Score"
-
-    @Text(
-        name = "300 Message",
-        category = "Score",
-        subcategory = "Message",
-    )
-    override var message300 = "300 Score"
-
-    @Switch(
-        name = "300 Time",
-        description = "Shows time to reach 300 score.",
-        category = "Score",
-        subcategory = "Message",
-    )
-    override var timeTo300 = false
-
     @Switch(
         name = "Show Run Information",
         description = "Shows run information under map.",
@@ -736,11 +648,49 @@ class AwesomeMapConfigImpl :
     )
     override var customPrefix = ""
 
-    @Extract
-    var background = GUIBackground()
+    class NotificationImpl : Notification {
+        @Transient
+        @Header(
+            text = "Notification On Score 270",
+            size = 2,
+            category = "Notification",
+        )
+        val headerOnScore270 = false
 
-    @HUD(
-        name = "HUD",
+        @Extract(
+            category = "Notification",
+        )
+        override var onScore270: NotificationOptionImpl = NotificationOptionImpl()
+
+        @Transient
+        @Header(
+            text = "Notification On Score 300",
+            size = 2,
+            category = "Notification",
+        )
+        val headerOnScore300 = false
+
+        @Extract(
+            category = "Notification",
+        )
+        override var onScore300: NotificationOptionImpl = NotificationOptionImpl()
+
+        @Transient
+        @Header(
+            text = "Notification On Mimic Killed",
+            size = 2,
+            category = "Notification",
+        )
+        val headerOnMimicKilled = false
+
+        @Extract(
+            category = "Notification",
+        )
+        override var onMimicKilled: NotificationOptionImpl = NotificationOptionImpl()
+    }
+
+    @Extract(
+        category = "Notification",
     )
-    var hud = AdvancedHUD()
+    override var notification = NotificationImpl()
 }

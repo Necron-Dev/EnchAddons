@@ -2,108 +2,103 @@ package net.skymoe.enchaddons.feature.awesomemap
 
 import cc.polyfrost.oneconfig.config.core.OneColor
 import net.skymoe.enchaddons.feature.config.FeatureConfig
+import net.skymoe.enchaddons.feature.config.NotificationOption
 
 interface AwesomeMapConfig : FeatureConfig {
-    var autoScan: Boolean
-    var scanChatInfo: Boolean
+    val autoScan: Boolean
+    val scanChatInfo: Boolean
 
-    var legitMode: Boolean
-    var peekMode: Int
+    val legitMode: Boolean
 
-    var mapEnabled: Boolean
-    var mapRotate: Boolean
-    var mapCenter: Boolean
-    var mapDynamicRotate: Boolean
-    var mapHideInBoss: Boolean
-    var playerHeads: Int
-    var mapVanillaMarker: Boolean
+    val mapRotate: Boolean
+    val mapCenter: Boolean
+    val mapDynamicRotate: Boolean
+    val mapHideInBoss: Boolean
+    val playerHeads: Int
+    val mapVanillaMarker: Boolean
 
-    var mapX: Int
-    var mapY: Int
-    var mapScale: Float
-    var textScale: Float
-    var playerHeadScale: Float
-    var playerNameScale: Float
+    val textScale: Float
+    val playerHeadScale: Float
+    val playerNameScale: Float
 
-    var mapBackground: OneColor
-    var mapBorder: OneColor
-    var mapBorderWidth: Float
+    val mapDarkenUndiscovered: Boolean
+    val mapDarkenPercent: Float
+    val mapGrayUndiscovered: Boolean
 
-    var mapDarkenUndiscovered: Boolean
-    var mapDarkenPercent: Float
-    var mapGrayUndiscovered: Boolean
+    val mapRoomNames: Int
+    val mapRoomSecrets: Int
+    val mapCenterRoomName: Boolean
+    val mapColorText: Boolean
+    val mapCheckmark: Int
+    val mapCenterCheckmark: Boolean
 
-    var mapRoomNames: Int
-    var mapRoomSecrets: Int
-    var mapCenterRoomName: Boolean
-    var mapColorText: Boolean
-    var mapCheckmark: Int
-    var mapCenterCheckmark: Boolean
+    val colorBloodDoor: OneColor
+    val colorEntranceDoor: OneColor
+    val colorRoomDoor: OneColor
+    val colorWitherDoor: OneColor
+    val colorOpenWitherDoor: OneColor
+    val colorUnopenedDoor: OneColor
 
-    var colorBloodDoor: OneColor
-    var colorEntranceDoor: OneColor
-    var colorRoomDoor: OneColor
-    var colorWitherDoor: OneColor
-    var colorOpenWitherDoor: OneColor
-    var colorUnopenedDoor: OneColor
+    val colorBlood: OneColor
+    val colorEntrance: OneColor
+    val colorFairy: OneColor
+    val colorMiniboss: OneColor
+    val colorRoom: OneColor
+    val colorRoomMimic: OneColor
+    val colorPuzzle: OneColor
+    val colorRare: OneColor
+    val colorTrap: OneColor
+    val colorUnopened: OneColor
 
-    var colorBlood: OneColor
-    var colorEntrance: OneColor
-    var colorFairy: OneColor
-    var colorMiniboss: OneColor
-    var colorRoom: OneColor
-    var colorRoomMimic: OneColor
-    var colorPuzzle: OneColor
-    var colorRare: OneColor
-    var colorTrap: OneColor
-    var colorUnopened: OneColor
+    val colorTextCleared: OneColor
+    val colorTextUncleared: OneColor
+    val colorTextGreen: OneColor
+    val colorTextFailed: OneColor
 
-    var colorTextCleared: OneColor
-    var colorTextUncleared: OneColor
-    var colorTextGreen: OneColor
-    var colorTextFailed: OneColor
+    val scoreElementEnabled: Boolean
+    val scoreAssumeSpirit: Boolean
+    val scoreMinimizedName: Boolean
+    val scoreHideInBoss: Boolean
 
-    var scoreElementEnabled: Boolean
-    var scoreAssumeSpirit: Boolean
-    var scoreMinimizedName: Boolean
-    var scoreHideInBoss: Boolean
+    val scoreX: Int
+    val scoreY: Int
+    val scoreScale: Float
 
-    var scoreX: Int
-    var scoreY: Int
-    var scoreScale: Float
+    val scoreTotalScore: Int
+    val scoreSecrets: Int
+    val scoreCrypts: Boolean
+    val scoreMimic: Boolean
+    val scoreDeaths: Boolean
+    val scorePuzzles: Int
 
-    var scoreTotalScore: Int
-    var scoreSecrets: Int
-    var scoreCrypts: Boolean
-    var scoreMimic: Boolean
-    var scoreDeaths: Boolean
-    var scorePuzzles: Int
-    var scoreMessage: Int
-    var scoreTitle: Int
-    var message270: String
-    var message300: String
-    var timeTo300: Boolean
+    val mapShowRunInformation: Boolean
+    val runInformationScore: Boolean
+    val runInformationSecrets: Int
+    val runInformationCrypts: Boolean
+    val runInformationMimic: Boolean
+    val runInformationDeaths: Boolean
 
-    var mapShowRunInformation: Boolean
-    var runInformationScore: Boolean
-    var runInformationSecrets: Int
-    var runInformationCrypts: Boolean
-    var runInformationMimic: Boolean
-    var runInformationDeaths: Boolean
+    val apiKey: String
+    val teamInfo: Boolean
 
-    var apiKey: String
-    var teamInfo: Boolean
+    val mimicMessageEnabled: Boolean
+    val mimicMessage: String
+    val witherDoorESP: Int
+    val witherDoorNoKeyColor: OneColor
+    val witherDoorKeyColor: OneColor
+    val witherDoorOutlineWidth: Float
+    val witherDoorOutline: Float
+    val witherDoorFill: Float
+    val forceSkyblock: Boolean
+    val paulBonus: Boolean
+    val renderBeta: Boolean
+    val customPrefix: String
 
-    var mimicMessageEnabled: Boolean
-    var mimicMessage: String
-    var witherDoorESP: Int
-    var witherDoorNoKeyColor: OneColor
-    var witherDoorKeyColor: OneColor
-    var witherDoorOutlineWidth: Float
-    var witherDoorOutline: Float
-    var witherDoorFill: Float
-    var forceSkyblock: Boolean
-    var paulBonus: Boolean
-    var renderBeta: Boolean
-    var customPrefix: String
+    val notification: Notification
+}
+
+interface Notification {
+    val onScore270: NotificationOption
+    val onScore300: NotificationOption
+    val onMimicKilled: NotificationOption
 }
