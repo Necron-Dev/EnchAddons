@@ -10,9 +10,6 @@ import net.skymoe.enchaddons.event.register
 import net.skymoe.enchaddons.feature.FeatureBase
 import net.skymoe.enchaddons.feature.config.invoke
 import net.skymoe.enchaddons.feature.featureInfo
-import net.skymoe.enchaddons.getLogger
-
-val logger = getLogger("Invincibility Timer")
 
 val INVINCIBILITY_TIMER_INFO = featureInfo<InvincibilityTimerConfig>("invincibility_timer", "Invincibility Timer")
 
