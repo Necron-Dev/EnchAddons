@@ -1,8 +1,8 @@
 package net.skymoe.enchaddons.impl.feature.awesomemap.features.dungeon
 
-import net.skymoe.enchaddons.api.Template
-import net.skymoe.enchaddons.api.setDefault
+import net.skymoe.enchaddons.EA
 import net.skymoe.enchaddons.feature.awesomemap.AwesomeMap
+import net.skymoe.enchaddons.feature.awesomemap.AwesomeMapEvent
 import net.skymoe.enchaddons.feature.config.invoke
 import net.skymoe.enchaddons.impl.feature.awesomemap.features.dungeon.RunInformation.completedRoomsPercentage
 import net.skymoe.enchaddons.impl.feature.awesomemap.features.dungeon.RunInformation.mimicKilled
@@ -10,8 +10,6 @@ import net.skymoe.enchaddons.impl.feature.awesomemap.features.dungeon.RunInforma
 import net.skymoe.enchaddons.impl.feature.awesomemap.utils.APIUtils
 import net.skymoe.enchaddons.impl.feature.awesomemap.utils.Location
 import kotlin.math.roundToInt
-import kotlin.time.DurationUnit
-import kotlin.time.toDuration
 
 object ScoreCalculation {
     val paul = APIUtils.hasBonusPaulScore()
@@ -20,20 +18,19 @@ object ScoreCalculation {
     var message300 = false
     var message270 = false
 
-    fun setPlaceholders(template: Template) {
-        template.setDefault()
-        template["time"] = RunInformation.timeElapsed.toDuration(DurationUnit.SECONDS)
-    }
-
     fun updateScore() {
         score = getSkillScore() + getExplorationScore() + getSpeedScore(RunInformation.timeElapsed) + getBonusScore()
         if (score >= 300 && !message300) {
             message300 = true
             message270 = true
-            AwesomeMap.config.notification.onScore300(AwesomeMap.logger, ::setPlaceholders)
+            AwesomeMapEvent.Score
+                .Reach300(RunInformation.timeElapsed)
+                .also(EA.eventDispatcher)
         } else if (score >= 270 && !message270) {
             message270 = true
-            AwesomeMap.config.notification.onScore270(AwesomeMap.logger, ::setPlaceholders)
+            AwesomeMapEvent.Score
+                .Reach270(RunInformation.timeElapsed)
+                .also(EA.eventDispatcher)
         }
     }
 

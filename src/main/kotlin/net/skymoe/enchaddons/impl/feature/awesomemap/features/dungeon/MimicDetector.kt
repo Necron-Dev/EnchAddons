@@ -6,8 +6,8 @@ import net.minecraft.entity.monster.EntityZombie
 import net.minecraft.init.Blocks
 import net.minecraft.tileentity.TileEntityChest
 import net.minecraft.util.BlockPos
-import net.skymoe.enchaddons.api.setDefault
-import net.skymoe.enchaddons.feature.awesomemap.AwesomeMap
+import net.skymoe.enchaddons.EA
+import net.skymoe.enchaddons.feature.awesomemap.AwesomeMapEvent
 import net.skymoe.enchaddons.feature.config.invoke
 import net.skymoe.enchaddons.impl.feature.awesomemap.features.dungeon.ScanUtils.getRoomFromPos
 import net.skymoe.enchaddons.util.MC
@@ -48,12 +48,9 @@ object MimicDetector {
 
     fun setMimicKilled() {
         RunInformation.mimicKilled = true
-        AwesomeMap.config.notification.onMimicKilled.invoke(
-            logger = AwesomeMap.logger,
-            placeholder = {
-                setDefault()
-            },
-        )
+        AwesomeMapEvent
+            .MimicKilled(RunInformation.timeElapsed)
+            .also(EA.eventDispatcher)
     }
 
     fun isMimic(entity: Entity): Boolean {

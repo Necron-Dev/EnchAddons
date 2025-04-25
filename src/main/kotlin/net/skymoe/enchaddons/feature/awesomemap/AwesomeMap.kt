@@ -6,11 +6,12 @@ import kotlinx.coroutines.launch
 import net.minecraft.client.gui.GuiScreen
 import net.minecraft.client.settings.KeyBinding
 import net.minecraftforge.fml.client.registry.ClientRegistry
-import net.minecraftforge.fml.common.gameevent.InputEvent
+import net.skymoe.enchaddons.api.setDefault
 import net.skymoe.enchaddons.event.RegistryEventDispatcher
 import net.skymoe.enchaddons.event.minecraft.*
 import net.skymoe.enchaddons.event.register
 import net.skymoe.enchaddons.feature.FeatureBase
+import net.skymoe.enchaddons.feature.config.invoke
 import net.skymoe.enchaddons.feature.ensureEnabled
 import net.skymoe.enchaddons.feature.ensureSkyBlockMode
 import net.skymoe.enchaddons.feature.featureInfo
@@ -22,6 +23,8 @@ import net.skymoe.enchaddons.util.MC
 import net.skymoe.enchaddons.util.scope.longrun
 import org.lwjgl.input.Keyboard
 import kotlin.coroutines.EmptyCoroutineContext
+import kotlin.time.DurationUnit
+import kotlin.time.toDuration
 
 val AWESOME_MAP_INFO = featureInfo<AwesomeMapConfig>("awesome_map", "Awesome Map")
 
@@ -30,12 +33,6 @@ object AwesomeMap : FeatureBase<AwesomeMapConfig>(AWESOME_MAP_INFO) {
     private val toggleLegitKey = KeyBinding("Legit Peek", Keyboard.KEY_NONE, "Funny Map")
     val scope = CoroutineScope(EmptyCoroutineContext)
     private var runningTick = atomic(false)
-
-    fun onKey(event: InputEvent.KeyInputEvent) {
-        if (config.peekMode == 0 && toggleLegitKey.isPressed) {
-//            MapRender.legitPeek = !MapRender.legitPeek
-        }
-    }
 
     override fun registerEvents(dispatcher: RegistryEventDispatcher) {
         dispatcher.run {
@@ -65,10 +62,6 @@ object AwesomeMap : FeatureBase<AwesomeMapConfig>(AWESOME_MAP_INFO) {
                     if (display != null) {
                         MC.displayGuiScreen(display)
                         display = null
-                    }
-
-                    if (config.peekMode == 1) {
-//                        MapRender.legitPeek = toggleLegitKey.isKeyDown
                     }
 
                     scope.launch {
@@ -157,6 +150,28 @@ object AwesomeMap : FeatureBase<AwesomeMapConfig>(AWESOME_MAP_INFO) {
                     ensureSkyBlockMode("dungeon")
 
                     WitherDoorESP.onRender(event)
+                }
+            }
+
+            register<AwesomeMapEvent.Score> { event ->
+                when (event) {
+                    is AwesomeMapEvent.Score.Reach270 ->
+                        config.notification.onScore270(logger) {
+                            setDefault()
+                            this["time"] = event.timeElapsed.toDuration(DurationUnit.SECONDS)
+                        }
+                    is AwesomeMapEvent.Score.Reach300 ->
+                        config.notification.onScore300(logger) {
+                            setDefault()
+                            this["time"] = event.timeElapsed.toDuration(DurationUnit.SECONDS)
+                        }
+                }
+            }
+
+            register<AwesomeMapEvent.MimicKilled> { event ->
+                config.notification.onMimicKilled(logger) {
+                    setDefault()
+                    this["time"] = event.timeElapsed.toDuration(DurationUnit.SECONDS)
                 }
             }
         }
