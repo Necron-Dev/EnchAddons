@@ -9,16 +9,23 @@ fun backgroundWidget(
     color: Int,
     radius: Double,
     blur: Double,
-): ListWidget {
-    return ListWidget(
-        ShadowWidget(
-            pos - padding,
-            pos + size + padding,
-            blur,
-            0.0,
-            radius,
-            1.0,
-        ),
+    shadow: Boolean,
+): ListWidget =
+    ListWidget(
+        *if (shadow) {
+            arrayOf(
+                ShadowWidget(
+                    pos - padding,
+                    pos + size + padding,
+                    blur,
+                    0.0,
+                    radius,
+                    1.0,
+                ),
+            )
+        } else {
+            arrayOf()
+        },
         RoundedRectWidget(
             pos - padding,
             pos + size + padding,
@@ -26,4 +33,3 @@ fun backgroundWidget(
             radius,
         ),
     )
-}

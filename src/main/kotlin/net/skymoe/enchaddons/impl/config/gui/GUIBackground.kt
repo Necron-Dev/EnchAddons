@@ -7,8 +7,6 @@ import cc.polyfrost.oneconfig.config.core.OneColor
 import net.skymoe.enchaddons.impl.nanovg.Transformation
 import net.skymoe.enchaddons.impl.nanovg.Widget
 import net.skymoe.enchaddons.impl.nanovg.widget.backgroundWidget
-import net.skymoe.enchaddons.util.Colors
-import net.skymoe.enchaddons.util.alphaScale
 import net.skymoe.enchaddons.util.math.Vec2D
 import net.skymoe.enchaddons.util.math.double
 
@@ -23,15 +21,21 @@ class GUIBackground {
         name = "Background Color",
         size = 2,
     )
-    var backgroundColorOption = OneColor(Colors.GRAY[9].rgb alphaScale 0.95)
+    var backgroundColorOption = OneColor(17, 18, 19, 204)
 
     @Number(
         name = "Rounded Corner Radius",
         min = 0.0F,
         max = Float.MAX_VALUE,
-        size = 1,
+        size = 2,
     )
     open var radiusOption = 6.0F
+
+    @Switch(
+        name = "Show Shadow",
+        size = 1,
+    )
+    var shadowEnabled = true
 
     @Number(
         name = "Shadow Blur",
@@ -72,6 +76,7 @@ class GUIBackground {
                     backgroundColorOption.rgb,
                     tr size minOf(radiusOption.double, size.x / 2.0 + paddingXOption, size.y / 2.0 + paddingYOption),
                     tr size shadowBlur.double,
+                    shadowEnabled,
                 ),
             )
         }
