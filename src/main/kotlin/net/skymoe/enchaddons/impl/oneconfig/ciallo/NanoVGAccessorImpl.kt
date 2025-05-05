@@ -21,7 +21,9 @@ import org.lwjgl.nanovg.NanoVGGL3.NVG_IMAGE_NODELETE
 import org.lwjgl.nanovg.NanoVGGL3.nvglCreateImageFromHandle
 import java.nio.ByteBuffer
 import java.util.*
-import kotlin.math.*
+import kotlin.math.PI
+import kotlin.math.asin
+import kotlin.math.min
 
 private fun NVGColor.fill(argb: Int): NVGColor {
     val (rv, gv, bv, av) = convertARGBToDoubleArray(argb)
@@ -71,6 +73,59 @@ object NanoVGAccessorImpl : NanoVGAccessor {
         }
     }
 
+    override fun drawCheckMark(
+        vg: Long,
+        x: Double,
+        y: Double,
+        size: Double,
+        lineWidth: Double,
+        color: Int,
+    ) {
+        withscope {
+            val nvgColor = NVGColor.calloc().using().fill(color)
+            nvgBeginPath(vg)
+            nvgStrokeColor(vg, nvgColor)
+            nvgStrokeWidth(vg, lineWidth.float)
+
+            nvgLineCap(vg, NVG_ROUND)
+            nvgLineJoin(vg, NVG_ROUND)
+
+            nvgMoveTo(vg, (x + .17 * size).float, (y + .6325 * size).float)
+            nvgLineTo(vg, (x + .475 * size).float, (y + .8125 * size).float)
+            nvgLineTo(vg, (x + .85 * size).float, (y + .225 * size).float)
+
+            nvgStroke(vg)
+            nvgClosePath(vg)
+        }
+    }
+
+    override fun drawCrossMark(
+        vg: Long,
+        x: Double,
+        y: Double,
+        size: Double,
+        lineWidth: Double,
+        color: Int,
+    ) {
+        withscope {
+            val nvgColor = NVGColor.calloc().using().fill(color)
+            nvgBeginPath(vg)
+            nvgStrokeColor(vg, nvgColor)
+            nvgStrokeWidth(vg, lineWidth.float)
+
+            nvgLineCap(vg, NVG_ROUND)
+            nvgLineJoin(vg, NVG_ROUND)
+
+            nvgMoveTo(vg, (x + .2 * size).float, (y + .2 * size).float)
+            nvgLineTo(vg, (x + .8 * size).float, (y + .8 * size).float)
+            nvgMoveTo(vg, (x + .2 * size).float, (y + .8 * size).float)
+            nvgLineTo(vg, (x + .8 * size).float, (y + .2 * size).float)
+
+            nvgStroke(vg)
+            nvgClosePath(vg)
+        }
+    }
+
     override fun drawRingRectRounded(
         vg: Long,
         x: Double,
@@ -113,7 +168,7 @@ object NanoVGAccessorImpl : NanoVGAccessor {
 
             nvgBeginPath(vg)
             nvgStrokeColor(vg, nvgColor)
-            nvgStrokeWidth(vg, lineWidth.toFloat())
+            nvgStrokeWidth(vg, lineWidth.float)
             nvgLineCap(vg, NVG_ROUND)
             nvgLineJoin(vg, NVG_ROUND)
 
@@ -121,7 +176,7 @@ object NanoVGAccessorImpl : NanoVGAccessor {
             val startX = x + width / 2.0
             val startY = y
 
-            nvgMoveTo(vg, startX.toFloat(), startY.toFloat())
+            nvgMoveTo(vg, startX.float, startY.float)
 
             // Helper function to draw segments
             fun drawSegment(
@@ -132,16 +187,16 @@ object NanoVGAccessorImpl : NanoVGAccessor {
                     0 -> { // Top segment
                         val segmentLength = width - 2 * radius
                         val currentX = x + width / 2.0 + (segmentLength / 2) * segmentProgress
-                        nvgLineTo(vg, currentX.toFloat(), y.toFloat())
+                        nvgLineTo(vg, currentX.float, y.float)
                     }
                     1 -> { // Top-Right Corner
                         val angle = (segmentProgress - 1.0) * PI / 2
                         nvgArc(
                             vg,
-                            (x + width - radius).toFloat(),
-                            (y + radius).toFloat(),
-                            radius.toFloat(),
-                            (-PI / 2).toFloat(),
+                            (x + width - radius).float,
+                            (y + radius).float,
+                            radius.float,
+                            (-PI / 2).float,
                             angle.float,
                             NVG_CW,
                         )
@@ -149,15 +204,15 @@ object NanoVGAccessorImpl : NanoVGAccessor {
                     2 -> { // Right segment
                         val segmentLength = height - 2 * radius
                         val currentY = y + radius + segmentLength * segmentProgress
-                        nvgLineTo(vg, (x + width).toFloat(), currentY.toFloat())
+                        nvgLineTo(vg, (x + width).float, currentY.float)
                     }
                     3 -> { // Bottom-Right Corner
                         val angle = segmentProgress * PI / 2
                         nvgArc(
                             vg,
-                            (x + width - radius).toFloat(),
-                            (y + height - radius).toFloat(),
-                            radius.toFloat(),
+                            (x + width - radius).float,
+                            (y + height - radius).float,
+                            radius.float,
                             0f,
                             angle.float,
                             NVG_CW,
@@ -166,16 +221,16 @@ object NanoVGAccessorImpl : NanoVGAccessor {
                     4 -> { // Bottom segment
                         val segmentLength = width - 2 * radius
                         val currentX = x + width - radius - segmentLength * segmentProgress
-                        nvgLineTo(vg, currentX.toFloat(), (y + height).toFloat())
+                        nvgLineTo(vg, currentX.float, (y + height).float)
                     }
                     5 -> { // Bottom-Left Corner
                         val angle = (segmentProgress + 1.0) * PI / 2
                         nvgArc(
                             vg,
-                            (x + radius).toFloat(),
-                            (y + height - radius).toFloat(),
-                            radius.toFloat(),
-                            (PI / 2).toFloat(),
+                            (x + radius).float,
+                            (y + height - radius).float,
+                            radius.float,
+                            (PI / 2).float,
                             angle.float,
                             NVG_CW,
                         )
@@ -183,16 +238,16 @@ object NanoVGAccessorImpl : NanoVGAccessor {
                     6 -> { // Left segment
                         val segmentLength = height - 2 * radius
                         val currentY = y + height - radius - segmentLength * segmentProgress
-                        nvgLineTo(vg, x.toFloat(), currentY.toFloat())
+                        nvgLineTo(vg, x.float, currentY.float)
                     }
                     7 -> { // Top-Left Corner
                         val angle = (segmentProgress + 2.0) * PI / 2
                         nvgArc(
                             vg,
-                            (x + radius).toFloat(),
-                            (y + radius).toFloat(),
-                            radius.toFloat(),
-                            PI.toFloat(),
+                            (x + radius).float,
+                            (y + radius).float,
+                            radius.float,
+                            PI.float,
                             angle.float,
                             NVG_CW,
                         )
@@ -200,7 +255,7 @@ object NanoVGAccessorImpl : NanoVGAccessor {
                     8 -> { // Top segment (partial, completing the circle)
                         val segmentLength = width / 2.0 - radius // Half of the width to the center
                         val currentX = x + radius + segmentLength * segmentProgress
-                        nvgLineTo(vg, currentX.toFloat(), y.toFloat())
+                        nvgLineTo(vg, currentX.float, y.float)
                     }
                 }
             }
@@ -215,6 +270,24 @@ object NanoVGAccessorImpl : NanoVGAccessor {
 
             nvgStroke(vg)
             nvgClosePath(vg)
+        }
+    }
+
+    override fun scissor(
+        vg: Long,
+        x: Double,
+        y: Double,
+        width: Double,
+        height: Double,
+    ) {
+        withscope {
+            nvgScissor(vg, x.float, y.float, width.float, height.float)
+        }
+    }
+
+    override fun resetScissor(vg: Long) {
+        withscope {
+            nvgResetScissor(vg)
         }
     }
 
@@ -509,6 +582,7 @@ object NanoVGAccessorImpl : NanoVGAccessor {
             val nvgColor = NVGColor.calloc().using().fill(shadowColor(color, colorMultiplier))
             nvgFontSize(vg, size.float)
             nvgFontFace(vg, font.name)
+            nvgTextAlign(vg, NVG_ALIGN_TOP or NVG_ALIGN_LEFT)
             val totalWidth = segments.sumOf { nvgTextBounds(vg, 0.0f, 0.0f, it.text, FloatArray(4)).double }
             val posX = x - totalWidth * anchor.x
             val posY = y - size * anchor.y

@@ -1,10 +1,10 @@
 package net.skymoe.enchaddons.impl.feature.awesomemap.features.dungeon
 
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.IO
 import kotlinx.coroutines.async
 import kotlinx.coroutines.launch
 import net.minecraft.event.HoverEvent
-import net.minecraft.util.ChatComponentText
 import net.minecraft.util.ChatStyle
 import net.minecraft.util.IChatComponent
 import net.skymoe.enchaddons.feature.awesomemap.AwesomeMap
@@ -17,7 +17,8 @@ import net.skymoe.enchaddons.impl.feature.awesomemap.core.map.Tile
 import net.skymoe.enchaddons.impl.feature.awesomemap.utils.APIUtils
 import net.skymoe.enchaddons.impl.feature.awesomemap.utils.Utils.equalsOneOf
 import net.skymoe.enchaddons.util.LogLevel
-import net.skymoe.enchaddons.util.MC
+import net.skymoe.enchaddons.util.buildComponent
+import net.skymoe.enchaddons.util.modMessage
 import kotlin.time.Duration.Companion.milliseconds
 
 object PlayerTracker {
@@ -50,14 +51,14 @@ object PlayerTracker {
                         Triple(
                             player.formattedName,
                             player,
-                            APIUtils.getSecrets(player.uuid),
+                            player.uuid?.let { APIUtils.getSecrets(it) } ?: 0,
                         )
                     }
                 }.map {
                     val (name, player, secrets) = it.await()
                     getStatMessage(name, player, secrets)
                 }.forEach {
-                    MC.thePlayer.addChatMessage(it)
+                    modMessage(it, LogLevel.INFO)
                 }
         }
     }
@@ -67,25 +68,30 @@ object PlayerTracker {
         player: DungeonPlayer,
         secrets: Int,
     ): IChatComponent {
-        val secretsComponent = ChatComponentText("§b${secrets - player.startingSecrets} §3secrets")
-
         val allClearedRooms = roomClears.filter { it.value.contains(name) }
         val soloClearedRooms = allClearedRooms.filter { it.value.size == 1 }
         val max = allClearedRooms.size
         val min = soloClearedRooms.size
 
+        val secretsComponent =
+            buildComponent {
+                "${secrets - player.startingSecrets} ".aqua
+                "secrets".darkAqua
+            }
+
         val roomComponent =
-            ChatComponentText(
-                "§b${if (soloClearedRooms.size != allClearedRooms.size) "$min-$max" else max} §3rooms cleared",
-            ).apply {
+            buildComponent {
+                "${if (soloClearedRooms.size != allClearedRooms.size) "$min-$max" else max} ".aqua
+                "rooms cleared".darkAqua
+            }.apply {
                 chatStyle =
                     ChatStyle().setChatHoverEvent(
                         HoverEvent(
                             HoverEvent.Action.SHOW_TEXT,
-                            ChatComponentText(
+                            buildComponent {
                                 roomClears.entries
                                     .filter {
-                                        !it.key.type.equalsOneOf(RoomType.BLOOD, RoomType.ENTRANCE, RoomType.FAIRY) &&
+                                        it.key.type !in arrayOf(RoomType.BLOOD, RoomType.ENTRANCE, RoomType.FAIRY) &&
                                             it.value.contains(name)
                                     }.joinToString(
                                         separator = "\n",
@@ -98,8 +104,8 @@ object PlayerTracker {
                                                 players.filter { it != name }.joinToString(separator = "§r, ")
                                             }"
                                         }
-                                    },
-                            ),
+                                    }.append
+                            },
                         ),
                     )
             }
@@ -107,51 +113,62 @@ object PlayerTracker {
         var lastTime = 0L
 
         val splitsComponent =
-            ChatComponentText("§3Splits").apply {
+            buildComponent {
+                "Splits".darkAqua
+            }.apply {
                 chatStyle =
                     ChatStyle().setChatHoverEvent(
                         HoverEvent(
                             HoverEvent.Action.SHOW_TEXT,
-                            ChatComponentText(
-                                player.roomVisits.joinToString(
-                                    separator = "\n",
-                                    prefix = "$name's §eRoom Splits:\n",
-                                ) { (elapsed, room) ->
-                                    val start = lastTime.milliseconds
-                                    lastTime += elapsed
-                                    val end = lastTime.milliseconds
-                                    "§b$start §7- §b$end §6$room"
-                                },
-                            ),
+                            buildComponent {
+                                player.roomVisits
+                                    .joinToString(
+                                        separator = "\n",
+                                        prefix = "$name's §eRoom Splits:\n",
+                                    ) { (elapsed, room) ->
+                                        val start = lastTime.milliseconds
+                                        lastTime += elapsed
+                                        val end = lastTime.milliseconds
+                                        "§b$start §7- §b$end §6$room"
+                                    }.append
+                            },
                         ),
                     )
             }
 
         val roomTimeComponent =
-            ChatComponentText("§3Times").apply {
+            buildComponent {
+                "Times".darkAqua
+            }.apply {
                 chatStyle =
                     ChatStyle().setChatHoverEvent(
                         HoverEvent(
                             HoverEvent.Action.SHOW_TEXT,
-                            ChatComponentText(
-                                player.roomVisits.groupBy { it.second }.entries.joinToString(
-                                    separator = "\n",
-                                    prefix = "$name's §eRoom Times:\n",
-                                ) { (room, times) ->
-                                    "§6$room §a- §b${times.sumOf { it.first }.milliseconds}"
-                                },
-                            ),
+                            buildComponent {
+                                player.roomVisits
+                                    .groupBy { it.second }
+                                    .entries
+                                    .joinToString(
+                                        separator = "\n",
+                                        prefix = "$name's §eRoom Times:\n",
+                                    ) { (room, times) ->
+                                        "§6$room §a- §b${times.sumOf { it.first }.milliseconds}"
+                                    }.append
+                            },
                         ),
                     )
             }
 
-        return LogLevel.INFO.component
-            .appendSibling(secretsComponent)
-            .appendText(" §6| ")
-            .appendSibling(roomComponent)
-            .appendText(" §6| ")
-            .appendSibling(splitsComponent)
-            .appendText(" §6| ")
-            .appendSibling(roomTimeComponent)
+        return buildComponent {
+            name.darkAqua
+            " > ".white
+            secretsComponent.append
+            " | ".gold
+            roomComponent.append
+            " | ".gold
+            splitsComponent.append
+            " | ".gold
+            roomTimeComponent.append
+        }
     }
 }

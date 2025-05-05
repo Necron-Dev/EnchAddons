@@ -1,6 +1,5 @@
 package net.skymoe.enchaddons.feature.awesomemap
 
-import cc.polyfrost.oneconfig.config.core.OneColor
 import net.skymoe.enchaddons.feature.config.FeatureConfig
 import net.skymoe.enchaddons.feature.config.NotificationOption
 
@@ -10,12 +9,12 @@ interface AwesomeMapConfig : FeatureConfig {
 
     val legitMode: Boolean
 
-    val mapRotate: Boolean
+    val mapRotateMode: Int
     val mapCenter: Boolean
-    val mapDynamicRotate: Boolean
     val mapHideInBoss: Boolean
     val playerHeads: Int
     val mapVanillaMarker: Boolean
+    val mapClip: Boolean
 
     val textScale: Float
     val playerHeadScale: Float
@@ -29,31 +28,8 @@ interface AwesomeMapConfig : FeatureConfig {
     val mapRoomSecrets: Int
     val mapCenterRoomName: Boolean
     val mapColorText: Boolean
-    val mapCheckmark: Int
+    val mapCheckmark: Boolean
     val mapCenterCheckmark: Boolean
-
-    val colorBloodDoor: OneColor
-    val colorEntranceDoor: OneColor
-    val colorRoomDoor: OneColor
-    val colorWitherDoor: OneColor
-    val colorOpenWitherDoor: OneColor
-    val colorUnopenedDoor: OneColor
-
-    val colorBlood: OneColor
-    val colorEntrance: OneColor
-    val colorFairy: OneColor
-    val colorMiniboss: OneColor
-    val colorRoom: OneColor
-    val colorRoomMimic: OneColor
-    val colorPuzzle: OneColor
-    val colorRare: OneColor
-    val colorTrap: OneColor
-    val colorUnopened: OneColor
-
-    val colorTextCleared: OneColor
-    val colorTextUncleared: OneColor
-    val colorTextGreen: OneColor
-    val colorTextFailed: OneColor
 
     val scoreElementEnabled: Boolean
     val scoreAssumeSpirit: Boolean
@@ -78,14 +54,9 @@ interface AwesomeMapConfig : FeatureConfig {
     val runInformationMimic: Boolean
     val runInformationDeaths: Boolean
 
-    val apiKey: String
     val teamInfo: Boolean
 
-    val mimicMessageEnabled: Boolean
-    val mimicMessage: String
     val witherDoorESP: Int
-    val witherDoorNoKeyColor: OneColor
-    val witherDoorKeyColor: OneColor
     val witherDoorOutlineWidth: Float
     val witherDoorOutline: Float
     val witherDoorFill: Float

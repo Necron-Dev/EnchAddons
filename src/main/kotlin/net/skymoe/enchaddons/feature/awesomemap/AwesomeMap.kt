@@ -3,9 +3,6 @@ package net.skymoe.enchaddons.feature.awesomemap
 import kotlinx.atomicfu.atomic
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
-import net.minecraft.client.gui.GuiScreen
-import net.minecraft.client.settings.KeyBinding
-import net.minecraftforge.fml.client.registry.ClientRegistry
 import net.skymoe.enchaddons.api.setDefault
 import net.skymoe.enchaddons.event.RegistryEventDispatcher
 import net.skymoe.enchaddons.event.minecraft.*
@@ -19,9 +16,7 @@ import net.skymoe.enchaddons.impl.feature.awesomemap.features.dungeon.*
 import net.skymoe.enchaddons.impl.feature.awesomemap.utils.Location
 import net.skymoe.enchaddons.impl.feature.awesomemap.utils.MapUtils
 import net.skymoe.enchaddons.impl.feature.awesomemap.utils.RenderUtils
-import net.skymoe.enchaddons.util.MC
 import net.skymoe.enchaddons.util.scope.longrun
-import org.lwjgl.input.Keyboard
 import kotlin.coroutines.EmptyCoroutineContext
 import kotlin.time.DurationUnit
 import kotlin.time.toDuration
@@ -29,8 +24,6 @@ import kotlin.time.toDuration
 val AWESOME_MAP_INFO = featureInfo<AwesomeMapConfig>("awesome_map", "Awesome Map")
 
 object AwesomeMap : FeatureBase<AwesomeMapConfig>(AWESOME_MAP_INFO) {
-    private var display: GuiScreen? = null
-    private val toggleLegitKey = KeyBinding("Legit Peek", Keyboard.KEY_NONE, "Funny Map")
     val scope = CoroutineScope(EmptyCoroutineContext)
     private var runningTick = atomic(false)
 
@@ -51,7 +44,6 @@ object AwesomeMap : FeatureBase<AwesomeMapConfig>(AWESOME_MAP_INFO) {
                 ScanUtils
                 ScoreCalculation
                 WitherDoorESP
-                ClientRegistry.registerKeyBinding(toggleLegitKey)
             }
 
             register<MinecraftEvent.Tick.Pre> {
@@ -59,17 +51,15 @@ object AwesomeMap : FeatureBase<AwesomeMapConfig>(AWESOME_MAP_INFO) {
                     ensureEnabled()
                     ensureSkyBlockMode("dungeon")
 
-                    if (display != null) {
-                        MC.displayGuiScreen(display)
-                        display = null
-                    }
-
                     scope.launch {
                         if (runningTick.getAndSet(true)) return@launch
-                        Dungeon.onTick()
+                        try {
+                            Dungeon.onTick()
 //                        GuiRenderer.onTick()
-                        Location.onTick()
-                        runningTick.value = false
+                            Location.onTick()
+                        } finally {
+                            runningTick.value = false
+                        }
                     }
                 }
             }

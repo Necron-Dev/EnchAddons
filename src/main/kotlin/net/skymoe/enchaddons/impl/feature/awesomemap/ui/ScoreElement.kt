@@ -2,6 +2,7 @@ package net.skymoe.enchaddons.impl.feature.awesomemap.ui
 
 import net.minecraft.client.gui.FontRenderer
 import net.skymoe.enchaddons.feature.awesomemap.AwesomeMap
+import net.skymoe.enchaddons.impl.config.EnchAddonsConfig
 import net.skymoe.enchaddons.impl.feature.awesomemap.features.dungeon.RunInformation
 import net.skymoe.enchaddons.impl.feature.awesomemap.features.dungeon.ScoreCalculation
 import net.skymoe.enchaddons.util.MC
@@ -82,7 +83,12 @@ class ScoreElement {
                     ScoreCalculation.score < 300 -> "§e"
                     else -> "§a"
                 }
-            var line = if (minimized) "" else "§7分数: "
+            var line =
+                if (minimized) {
+                    "§7${EnchAddonsConfig.dungeonConfig.awesomeMapConfig.textMinimizedScore}: "
+                } else {
+                    "§7${EnchAddonsConfig.dungeonConfig.awesomeMapConfig.textScore}: "
+                }
             if (expanded) {
                 line += "§b${ScoreCalculation.getSkillScore()}§7/" +
                     "§a${ScoreCalculation.getExplorationScore()}§7/" +
@@ -98,7 +104,12 @@ class ScoreElement {
             minimized: Boolean = false,
             missing: Boolean,
         ): String {
-            var line = if (minimized) "" else "§7秘密: "
+            var line =
+                if (minimized) {
+                    "§7${EnchAddonsConfig.dungeonConfig.awesomeMapConfig.textMinimizedSecrets}: "
+                } else {
+                    "§7${EnchAddonsConfig.dungeonConfig.awesomeMapConfig.textSecrets}: "
+                }
             line += "§b${RunInformation.secretsFound}§7/"
             if (missing) {
                 val missingSecrets = (RunInformation.minSecrets - RunInformation.secretsFound).coerceAtLeast(0)
@@ -110,19 +121,47 @@ class ScoreElement {
         }
 
         private fun getCrypts(minimized: Boolean = false): String {
-            var line = if (minimized) "§7C: " else "§7坟: "
+            var line =
+                if (minimized) {
+                    "§7${EnchAddonsConfig.dungeonConfig.awesomeMapConfig.textMinimizedCrypts}: "
+                } else {
+                    "§7${EnchAddonsConfig.dungeonConfig.awesomeMapConfig.textCrypts}: "
+                }
             line += if (RunInformation.cryptsCount >= 5) "§a${RunInformation.cryptsCount}" else "§c${RunInformation.cryptsCount}"
             return line
         }
 
         private fun getMimic(minimized: Boolean = false): String {
-            var line = if (minimized) "§7M: " else "§7Mimic: "
-            line += if (RunInformation.mimicKilled) "§aY" else "§cN"
+            var line =
+                if (minimized) {
+                    "§7${EnchAddonsConfig.dungeonConfig.awesomeMapConfig.textMinimizedMimic}: "
+                } else {
+                    "§7${EnchAddonsConfig.dungeonConfig.awesomeMapConfig.textMimic}: "
+                }
+            line +=
+                if (RunInformation.mimicKilled) {
+                    if (minimized) {
+                        "§a${EnchAddonsConfig.dungeonConfig.awesomeMapConfig.textMinimizedMimicYes}"
+                    } else {
+                        "§a${EnchAddonsConfig.dungeonConfig.awesomeMapConfig.textMimicYes}"
+                    }
+                } else {
+                    if (minimized) {
+                        "§c${EnchAddonsConfig.dungeonConfig.awesomeMapConfig.textMinimizedMimicNo}"
+                    } else {
+                        "§c${EnchAddonsConfig.dungeonConfig.awesomeMapConfig.textMimicNo}"
+                    }
+                }
             return line
         }
 
         private fun getDeaths(minimized: Boolean = false): String {
-            var line = if (minimized) "§7D: " else "§7死亡: "
+            var line =
+                if (minimized) {
+                    "§7${EnchAddonsConfig.dungeonConfig.awesomeMapConfig.textMinimizedDeaths}: "
+                } else {
+                    "§7${EnchAddonsConfig.dungeonConfig.awesomeMapConfig.textDeaths}: "
+                }
             line += "§c${RunInformation.deathCount}"
             return line
         }
@@ -132,7 +171,12 @@ class ScoreElement {
             total: Boolean,
         ): String {
             val color = if (RunInformation.completedPuzzles == RunInformation.totalPuzzles) "§a" else "§c"
-            var line = if (minimized) "§7P: " else "§7Puzzles: "
+            var line =
+                if (minimized) {
+                    "§7${EnchAddonsConfig.dungeonConfig.awesomeMapConfig.textMinimizedPuzzles}: "
+                } else {
+                    "§7${EnchAddonsConfig.dungeonConfig.awesomeMapConfig.textPuzzles}: "
+                }
             line += "$color${RunInformation.completedPuzzles}"
             if (total) line += "§7/$color${RunInformation.totalPuzzles}"
             return line

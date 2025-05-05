@@ -13,7 +13,8 @@ import net.skymoe.enchaddons.impl.feature.awesomemap.utils.MapUtils.yaw
 import net.skymoe.enchaddons.impl.feature.awesomemap.utils.TabList
 import net.skymoe.enchaddons.impl.feature.awesomemap.utils.Utils.equalsOneOf
 import net.skymoe.enchaddons.util.MC
-import kotlin.math.roundToInt
+import net.skymoe.enchaddons.util.currPos
+import net.skymoe.enchaddons.util.math.double
 
 object MapUpdate {
     var roomAdded = false
@@ -40,7 +41,7 @@ object MapUpdate {
                         .split(" ")[0]
                 if (name != "") {
                     Dungeon.dungeonTeammates[name] =
-                        DungeonPlayer(first.locationSkin).apply {
+                        DungeonPlayer(first.locationSkin, TabList.getPlayerUUIDByName(name)).apply {
                             MC.theWorld.getPlayerEntityByName(name)?.let { setData(it) }
                             colorPrefix = second.substringBefore(name, "f").last()
                             this.name = name
@@ -90,16 +91,33 @@ object MapUpdate {
         Dungeon.dungeonTeammates.forEach { (name, player) ->
             decor.entries.find { (icon, _) -> icon == player.icon }?.let { (_, vec4b) ->
                 player.isPlayer = vec4b.func_176110_a().toInt() == 1
-                player.mapX = vec4b.mapX
-                player.mapZ = vec4b.mapZ
-                player.yaw = vec4b.yaw
+
+                val entityPlayer = MC.theWorld?.getPlayerEntityByUUID(player.uuid)
+
+                player.prevYaw = player.yaw
+                player.prevPosition.mapX = player.position.mapX
+                player.prevPosition.mapZ = player.position.mapZ
+
+                if (entityPlayer != null) {
+                    player.yaw = entityPlayer.rotationYaw
+                    player.position.mapX =
+                        (entityPlayer.currPos.x - DungeonScan.START_X + 15) * MapUtils.coordMultiplier + MapUtils.startCorner.first
+                    player.position.mapZ =
+                        (entityPlayer.currPos.z - DungeonScan.START_X + 15) * MapUtils.coordMultiplier + MapUtils.startCorner.second
+                } else {
+                    player.yaw = vec4b.yaw
+                    player.position.mapX = vec4b.mapX.double
+                    player.position.mapZ = vec4b.mapZ.double
+                }
             }
             if (player.isPlayer || name == MC.thePlayer.name) {
                 player.yaw = MC.thePlayer.rotationYaw
-                player.mapX =
-                    ((MC.thePlayer.posX - DungeonScan.START_X + 15) * MapUtils.coordMultiplier + MapUtils.startCorner.first).roundToInt()
-                player.mapZ =
-                    ((MC.thePlayer.posZ - DungeonScan.START_Z + 15) * MapUtils.coordMultiplier + MapUtils.startCorner.second).roundToInt()
+                player.position.mapX =
+                    ((MC.thePlayer.posX - DungeonScan.START_X + 15) * MapUtils.coordMultiplier + MapUtils.startCorner.first)
+                        .double
+                player.position.mapZ =
+                    ((MC.thePlayer.posZ - DungeonScan.START_Z + 15) * MapUtils.coordMultiplier + MapUtils.startCorner.second)
+                        .double
             }
         }
     }

@@ -1,31 +1,17 @@
 package net.skymoe.enchaddons.impl.feature.awesomemap.features.dungeon
 
-import net.minecraft.block.state.IBlockState
 import net.minecraft.entity.Entity
 import net.minecraft.entity.monster.EntityZombie
-import net.minecraft.init.Blocks
 import net.minecraft.tileentity.TileEntityChest
 import net.minecraft.util.BlockPos
 import net.skymoe.enchaddons.EA
 import net.skymoe.enchaddons.feature.awesomemap.AwesomeMapEvent
-import net.skymoe.enchaddons.feature.config.invoke
 import net.skymoe.enchaddons.impl.feature.awesomemap.features.dungeon.ScanUtils.getRoomFromPos
 import net.skymoe.enchaddons.util.MC
 
 object MimicDetector {
     var mimicOpenTime = 0L
     var mimicPos: BlockPos? = null
-
-    fun onBlockChange(
-        pos: BlockPos,
-        old: IBlockState,
-        new: IBlockState,
-    ) {
-        if (old.block == Blocks.trapped_chest && new.block == Blocks.air) {
-            mimicOpenTime = System.currentTimeMillis()
-            mimicPos = pos
-        }
-    }
 
     fun checkMimicDead() {
         if (RunInformation.mimicKilled) return

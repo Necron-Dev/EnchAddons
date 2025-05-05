@@ -1,6 +1,6 @@
 package net.skymoe.enchaddons.impl.feature.awesomemap.core.map
 
-import net.skymoe.enchaddons.feature.awesomemap.AwesomeMap
+import net.skymoe.enchaddons.impl.config.EnchAddonsConfig
 import net.skymoe.enchaddons.impl.feature.awesomemap.core.RoomData
 import net.skymoe.enchaddons.impl.feature.awesomemap.features.dungeon.MapRender
 import java.awt.Color
@@ -17,21 +17,38 @@ class Room(
     override val color: Color
         get() =
             if (MapRender.legitRender && state == RoomState.UNOPENED) {
-                AwesomeMap.config.colorUnopened.toJavaColor()
+                EnchAddonsConfig.dungeonConfig.awesomeMapConfig.colorUnopened
+                    .toJavaColor()
             } else {
                 when (data.type) {
-                    RoomType.BLOOD -> AwesomeMap.config.colorBlood.toJavaColor()
-                    RoomType.CHAMPION -> AwesomeMap.config.colorMiniboss.toJavaColor()
-                    RoomType.ENTRANCE -> AwesomeMap.config.colorEntrance.toJavaColor()
-                    RoomType.FAIRY -> AwesomeMap.config.colorFairy.toJavaColor()
-                    RoomType.PUZZLE -> AwesomeMap.config.colorPuzzle.toJavaColor()
-                    RoomType.RARE -> AwesomeMap.config.colorRare.toJavaColor()
-                    RoomType.TRAP -> AwesomeMap.config.colorTrap.toJavaColor()
+                    RoomType.BLOOD ->
+                        EnchAddonsConfig.dungeonConfig.awesomeMapConfig.colorBlood
+                            .toJavaColor()
+                    RoomType.CHAMPION ->
+                        EnchAddonsConfig.dungeonConfig.awesomeMapConfig.colorMiniboss
+                            .toJavaColor()
+                    RoomType.ENTRANCE ->
+                        EnchAddonsConfig.dungeonConfig.awesomeMapConfig.colorEntrance
+                            .toJavaColor()
+                    RoomType.FAIRY ->
+                        EnchAddonsConfig.dungeonConfig.awesomeMapConfig.colorFairy
+                            .toJavaColor()
+                    RoomType.PUZZLE ->
+                        EnchAddonsConfig.dungeonConfig.awesomeMapConfig.colorPuzzle
+                            .toJavaColor()
+                    RoomType.RARE ->
+                        EnchAddonsConfig.dungeonConfig.awesomeMapConfig.colorRare
+                            .toJavaColor()
+                    RoomType.TRAP ->
+                        EnchAddonsConfig.dungeonConfig.awesomeMapConfig.colorTrap
+                            .toJavaColor()
                     else ->
                         if (uniqueRoom?.hasMimic == true) {
-                            AwesomeMap.config.colorRoomMimic.toJavaColor()
+                            EnchAddonsConfig.dungeonConfig.awesomeMapConfig.colorRoomMimic
+                                .toJavaColor()
                         } else {
-                            AwesomeMap.config.colorRoom.toJavaColor()
+                            EnchAddonsConfig.dungeonConfig.awesomeMapConfig.colorRoom
+                                .toJavaColor()
                         }
                 }
             }

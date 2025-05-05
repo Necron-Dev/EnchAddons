@@ -24,6 +24,7 @@ class ComponentBuilderScope(
     data class Element(
         val text: String,
         var style: Style,
+        val component: IChatComponent? = null,
     ) {
         private fun modifyStyle(modifier: Style.() -> Style) = apply { style = modifier(style) }
 
@@ -55,6 +56,8 @@ class ComponentBuilderScope(
 
     val String.append get() = toElement()
 
+    val IChatComponent.append get() = elements.add(Element("", parentStyle, this))
+
     val String.black get() = toElement().black
     val String.darkBlue get() = toElement().darkBlue
     val String.darkGreen get() = toElement().darkGreen
@@ -81,6 +84,11 @@ class ComponentBuilderScope(
     fun build(): IChatComponent =
         "".asComponent().apply {
             elements.forEach { element ->
+                element.component?.let {
+                    siblings.add(it)
+                    return@forEach
+                }
+
                 siblings.add(
                     element.text.asComponent().apply {
                         chatStyle.color = element.style.color.formatting

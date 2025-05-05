@@ -1,6 +1,6 @@
 package net.skymoe.enchaddons.impl.feature.awesomemap.core.map
 
-import net.skymoe.enchaddons.feature.awesomemap.AwesomeMap
+import net.skymoe.enchaddons.impl.config.EnchAddonsConfig
 import net.skymoe.enchaddons.impl.feature.awesomemap.features.dungeon.MapRender
 import java.awt.Color
 
@@ -14,18 +14,27 @@ class Door(
     override val color: Color
         get() =
             if (MapRender.legitRender && state == RoomState.UNOPENED) {
-                AwesomeMap.config.colorUnopenedDoor.toJavaColor()
+                EnchAddonsConfig.dungeonConfig.awesomeMapConfig.colorUnopenedDoor
+                    .toJavaColor()
             } else {
                 when (type) {
-                    DoorType.BLOOD -> AwesomeMap.config.colorBloodDoor.toJavaColor()
-                    DoorType.ENTRANCE -> AwesomeMap.config.colorEntranceDoor.toJavaColor()
+                    DoorType.BLOOD ->
+                        EnchAddonsConfig.dungeonConfig.awesomeMapConfig.colorBloodDoor
+                            .toJavaColor()
+                    DoorType.ENTRANCE ->
+                        EnchAddonsConfig.dungeonConfig.awesomeMapConfig.colorEntranceDoor
+                            .toJavaColor()
                     DoorType.WITHER ->
                         if (opened) {
-                            AwesomeMap.config.colorOpenWitherDoor.toJavaColor()
+                            EnchAddonsConfig.dungeonConfig.awesomeMapConfig.colorOpenWitherDoor
+                                .toJavaColor()
                         } else {
-                            AwesomeMap.config.colorWitherDoor.toJavaColor()
+                            EnchAddonsConfig.dungeonConfig.awesomeMapConfig.colorWitherDoor
+                                .toJavaColor()
                         }
-                    else -> AwesomeMap.config.colorRoomDoor.toJavaColor()
+                    else ->
+                        EnchAddonsConfig.dungeonConfig.awesomeMapConfig.colorRoomDoor
+                            .toJavaColor()
                 }
             }
 }

@@ -1,9 +1,12 @@
 package net.skymoe.enchaddons.impl.feature.awesomemap
 
 import net.skymoe.enchaddons.feature.awesomemap.AwesomeMap
+import net.skymoe.enchaddons.feature.ensure
 import net.skymoe.enchaddons.feature.ensureEnabled
 import net.skymoe.enchaddons.feature.ensureSkyBlockMode
+import net.skymoe.enchaddons.impl.config.EnchAddonsConfig
 import net.skymoe.enchaddons.impl.config.feature.AwesomeMapConfigImpl
+import net.skymoe.enchaddons.impl.feature.awesomemap.utils.Location
 import net.skymoe.enchaddons.impl.hud.FeatureHUDBase
 import net.skymoe.enchaddons.impl.nanovg.Transformation
 import net.skymoe.enchaddons.impl.nanovg.Widget
@@ -20,6 +23,9 @@ object AwesomeMapHUD : FeatureHUDBase<AwesomeMapConfigImpl, AwesomeMap>(AwesomeM
         ensureEnabled()
         ensureSkyBlockMode("dungeon")
         ensureHUDEnabled()
+        ensure {
+            !(config.mapHideInBoss && Location.inBoss)
+        }
     }
 
     override fun reset() {
@@ -32,6 +38,8 @@ object AwesomeMapHUD : FeatureHUDBase<AwesomeMapConfigImpl, AwesomeMap>(AwesomeM
         tr: Transformation,
     ) {
         config.background.addTo(AwesomeMapHUD.widgets, tr, size)
-        widgets.add(AwesomeMapWidget(cache, tr pos (Vec2D(0.0, 0.0)), tr size 1.0))
+        widgets.add(
+            AwesomeMapWidget(cache, tr pos (Vec2D(0.0, 0.0)), tr size 1.0, width, height, EnchAddonsConfig.dungeonConfig.awesomeMapConfig),
+        )
     }
 }

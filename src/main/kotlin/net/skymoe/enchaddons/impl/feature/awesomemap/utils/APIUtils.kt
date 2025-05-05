@@ -1,33 +1,28 @@
 package net.skymoe.enchaddons.impl.feature.awesomemap.utils
 
 import com.google.gson.JsonParser
-import net.skymoe.enchaddons.feature.awesomemap.AwesomeMap
+import net.skymoe.enchaddons.util.scope.noexcept
 import org.apache.http.client.methods.HttpGet
 import org.apache.http.impl.client.HttpClients
 import org.apache.http.util.EntityUtils
+import java.util.UUID
 
 object APIUtils {
     fun fetch(uri: String): String? {
         HttpClients.createMinimal().use {
-            try {
+            return noexcept {
                 val httpGet = HttpGet(uri)
                 return EntityUtils.toString(it.execute(httpGet).entity)
-            } catch (e: Exception) {
-                return null
             }
         }
     }
 
-    fun getSecrets(uuid: String): Int {
-        val response = fetch("https://api.hypixel.net/player?key=${AwesomeMap.config.apiKey}&uuid=$uuid") ?: return 0
-        val jsonObject = JsonParser().parse(response).toJsonObject() ?: return 0
-        if (jsonObject.getJsonPrimitive("success")?.asBoolean == true) {
-            return jsonObject
-                .getJsonObject("player")
-                ?.getJsonObject("achievements")
-                ?.getJsonPrimitive("skyblock_treasure_hunter")
-                ?.asInt ?: return 0
+    fun getSecrets(uuid: UUID): Int {
+        repeat(3) {
+            val result = fetch("https://api.tenios.dev/secrets/$uuid")?.toIntOrNull()
+            if (result != null) return result
         }
+
         return 0
     }
 

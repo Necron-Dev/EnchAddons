@@ -1,8 +1,7 @@
 package net.skymoe.enchaddons.impl.feature.awesomemap
 
 import net.minecraft.util.ResourceLocation
-import net.skymoe.enchaddons.feature.awesomemap.AwesomeMap
-import net.skymoe.enchaddons.impl.config.EnchAddonsConfig
+import net.skymoe.enchaddons.impl.config.feature.AwesomeMapConfigImpl
 import net.skymoe.enchaddons.impl.feature.awesomemap.core.DungeonPlayer
 import net.skymoe.enchaddons.impl.feature.awesomemap.core.map.*
 import net.skymoe.enchaddons.impl.feature.awesomemap.features.dungeon.Dungeon
@@ -19,6 +18,7 @@ import net.skymoe.enchaddons.impl.feature.awesomemap.utils.Utils.itemID
 import net.skymoe.enchaddons.impl.nanovg.NanoVGUIContext
 import net.skymoe.enchaddons.impl.nanovg.Transformation
 import net.skymoe.enchaddons.impl.nanovg.Widget
+import net.skymoe.enchaddons.impl.oneconfig.FONT_MEDIUM_Y_OFFSET
 import net.skymoe.enchaddons.impl.oneconfig.NanoVGImageCache
 import net.skymoe.enchaddons.impl.oneconfig.fontMedium
 import net.skymoe.enchaddons.impl.oneconfig.fontSemiBold
@@ -31,6 +31,8 @@ import net.skymoe.enchaddons.util.math.double
 import net.skymoe.enchaddons.util.math.float
 import net.skymoe.enchaddons.util.math.int
 import net.skymoe.enchaddons.util.math.lerp
+import net.skymoe.enchaddons.util.partialTicks
+import net.skymoe.enchaddons.util.renderPos
 import net.skymoe.enchaddons.util.toStyledSegments
 import kotlin.math.PI
 
@@ -38,82 +40,57 @@ data class AwesomeMapWidget(
     private val cache: NanoVGImageCache,
     private val pos: Vec2D,
     private val mapScale: Double,
+    private val width: Double,
+    private val height: Double,
+    private val config: AwesomeMapConfigImpl,
     private val mapAlpha: Double = 1.0,
 ) : Widget<AwesomeMapWidget> {
     override fun draw(context: NanoVGUIContext) {
+        val realScale = mapScale
         context.run {
-            if (AwesomeMap.config.mapCenter) {
+            nvg.save(vg)
+
+            if (config.mapCenter || config.mapRotateMode != 0) {
                 nvg.save(vg)
-                nvg.translate(
+            }
+
+            if (config.mapClip) {
+                nvg.scissor(vg, pos.x, pos.y, width * mapScale, height * mapScale)
+            }
+
+            if (config.mapRotateMode != 0) {
+                nvg.translate(vg, Vec2D(pos.x + 64.0 * mapScale, pos.y + 64.0 * mapScale))
+                nvg.rotate(
                     vg,
-                    Vec2D(
-                        -(
-                            (MC.thePlayer.posX - DungeonScan.START_X + 15) * MapUtils.coordMultiplier +
-                                MapUtils.startCorner.first -
-                                2
-                        ),
-                        -(
-                            (MC.thePlayer.posZ - DungeonScan.START_Z + 15) * MapUtils.coordMultiplier +
-                                MapUtils.startCorner.second -
-                                2
-                        ),
-                    ) * mapScale,
+                    when (config.mapRotateMode) {
+                        1 -> -MC.thePlayer.rotationYaw + 180.0
+                        2 -> MapRender.dynamicRotation.double
+                        else -> -MC.thePlayer.rotationYaw + 180.0
+                    } * PI / 180.0,
                 )
             }
 
-            if (AwesomeMap.config.mapRotate) {
-                nvg.save(vg)
-                nvg.translate(vg, Vec2D(pos.x + 64.0 * mapScale, pos.y + 64.0 * mapScale))
-
-                nvg.rotate(vg, (-MC.thePlayer.rotationYaw + 180.0) * PI / 180.0)
+            if (config.mapCenter) {
+                nvg.translate(
+                    vg,
+                    (
+                        Vec2D(
+                            (MC.thePlayer.renderPos.x - DungeonScan.START_X + 15) * MapUtils.coordMultiplier + MapUtils.startCorner.first,
+                            (MC.thePlayer.renderPos.z - DungeonScan.START_Z + 15) * MapUtils.coordMultiplier + MapUtils.startCorner.second,
+                        ) * -1.0 + Vec2D(64.0, 64.0)
+                    ) * realScale,
+                )
             }
         }
 
-//        if (AwesomeMap.config.mapRotate || AwesomeMap.config.mapDynamicRotate) {
-//            context.run {
-//                nvg.save(vg)
-//                nvg.translate(vg, Vec2D(pos.x + 64.0, pos.y + 64.0))
-//                if (AwesomeMap.config.mapDynamicRotate) {
-//                    nvg.rotate(vg, -MapRender.dynamicRotation * PI / 180.0)
-//                } else {
-//                    nvg.rotate(vg, (-MC.thePlayer.rotationYaw + 180.0) * PI / 180.0)
-//                }
-//                if (AwesomeMap.config.mapCenter) {
-//                    nvg.translate(
-//                        vg,
-//                        Vec2D(
-//                            -((MC.thePlayer.posX - DungeonScan.START_X + 15) * MapUtils.coordMultiplier + MapUtils.startCorner.first - 2),
-//                            -((MC.thePlayer.posZ - DungeonScan.START_Z + 15) * MapUtils.coordMultiplier + MapUtils.startCorner.second - 2),
-//                        ),
-//                    )
-//                } else {
-//                    nvg.translate(vg, Vec2D(-64.0, -64.0))
-//                }
-//            }
-//        }
-
-        val tr = (Transformation() + pos) * mapScale
+        val tr = (Transformation() + pos) * realScale
         context.run {
-            if (AwesomeMap.config.mapRotate) {
+            if (config.mapRotateMode != 0) {
                 nvg.translate(vg, Vec2D(-pos.x - 64.0 * mapScale, -pos.y - 64.0 * mapScale))
-            }
 
-            if (AwesomeMap.config.mapCenter) {
-                nvg.translate(
-                    vg,
-                    Vec2D(
-                        (
-                            (MC.thePlayer.posX - DungeonScan.START_X + 15) * MapUtils.coordMultiplier +
-                                MapUtils.startCorner.first -
-                                2
-                        ),
-                        (
-                            (MC.thePlayer.posZ - DungeonScan.START_Z + 15) * MapUtils.coordMultiplier +
-                                MapUtils.startCorner.second -
-                                2
-                        ),
-                    ) * mapScale,
-                )
+                if (config.mapCenter) {
+                    nvg.translate(vg, Vec2D(-1.0, -1.0) * realScale)
+                }
             }
 
             drawMap(tr)
@@ -121,42 +98,21 @@ data class AwesomeMapWidget(
                 drawPlayerHeads(tr)
             }
 
-            if (AwesomeMap.config.mapRotate) {
+            if (config.mapClip) {
+                nvg.resetScissor(vg)
+            }
+
+            if (config.mapCenter || config.mapRotateMode != 0) {
                 nvg.restore(vg)
             }
 
-            if (AwesomeMap.config.mapCenter) {
-                nvg.restore(vg)
-            }
-
-            if (AwesomeMap.config.mapShowRunInformation) {
+            if (config.mapShowRunInformation) {
                 drawRunInfo(tr)
             }
+
+            nvg.restore(vg)
         }
     }
-
-    //    fun setupRotate() {
-//        val scale = ScaledResolution(MC).scaleFactor
-//        GL11.glEnable(GL11.GL_SCISSOR_TEST)
-//        GL11.glScissor(
-//            (AwesomeMap.config.mapX * scale),
-//            (MC.displayHeight - AwesomeMap.config.mapY * scale - 128 * scale * AwesomeMap.config.mapScale).toInt(),
-//            (128 * scale * AwesomeMap.config.mapScale).toInt(),
-//            (128 * scale * AwesomeMap.config.mapScale).toInt(),
-//        )
-//        GlStateManager.translate(64.0, 64.0, 0.0)
-//        GlStateManager.rotate(-MC.thePlayer.rotationYaw + 180f, 0f, 0f, 1f)
-//
-//        if (AwesomeMap.config.mapCenter) {
-//            GlStateManager.translate(
-//                -((MC.thePlayer.posX - DungeonScan.START_X + 15) * MapUtils.coordMultiplier + MapUtils.startCorner.first - 2),
-//                -((MC.thePlayer.posZ - DungeonScan.START_Z + 15) * MapUtils.coordMultiplier + MapUtils.startCorner.second - 2),
-//                0.0,
-//            )
-//        } else {
-//            GlStateManager.translate(-64.0, -64.0, 0.0)
-//        }
-//    }
 
     private fun NanoVGUIContext.drawMap(tr: Transformation) {
         val ttr =
@@ -173,7 +129,7 @@ data class AwesomeMapWidget(
             for (x in 0..10) {
                 val tile = Dungeon.Info.dungeonList[y * 11 + x]
                 if (tile is Unknown) continue
-                if (MapRender.legitRender && tile.state == RoomState.UNDISCOVERED) continue
+                if (legitRender && tile.state == RoomState.UNDISCOVERED) continue
                 if (tile is Room) tile.uniqueRoom?.also(uniqueRooms::add)
                 if (tile is Door) doors.add(tile to (x to y))
             }
@@ -204,56 +160,121 @@ data class AwesomeMapWidget(
             if (legitRender && uniqueRoom.mainRoom.state.equalsOneOf(RoomState.UNDISCOVERED, RoomState.UNOPENED)) return@forEach
             val checkPos = uniqueRoom.getCheckmarkPosition()
             val namePos = uniqueRoom.getNamePosition()
+
             val xOffsetCheck = (checkPos.first / 2f) * (MapUtils.roomSize + MapUtils.connectorSize)
             val yOffsetCheck = (checkPos.second / 2f) * (MapUtils.roomSize + MapUtils.connectorSize)
             val xOffsetName = (namePos.first / 2f) * (MapUtils.roomSize + MapUtils.connectorSize)
             val yOffsetName = (namePos.second / 2f) * (MapUtils.roomSize + MapUtils.connectorSize)
 
-//            if (AwesomeMap.config.mapCheckmark != 0 && AwesomeMap.config.mapRoomSecrets != 2) {
-//                RenderUtils.drawCheckmark(xOffsetCheck, yOffsetCheck, uniqueRoom.mainRoom.state)
-//            }
+            nvg.save(vg)
+            nvg.translate(
+                vg,
+                Vec2D(
+                    ttr posX (xOffsetCheck.double + MapUtils.roomSize / 2.0),
+                    ttr posY (yOffsetCheck.double + MapUtils.roomSize / 2.0),
+                ),
+            )
 
-            val color =
-                (
-                    if (AwesomeMap.config.mapColorText) {
-                        when (uniqueRoom.mainRoom.state) {
-                            RoomState.GREEN -> AwesomeMap.config.colorTextGreen
-                            RoomState.CLEARED -> AwesomeMap.config.colorTextCleared
-                            RoomState.FAILED -> AwesomeMap.config.colorTextFailed
-                            else -> AwesomeMap.config.colorTextUncleared
-                        }
-                    } else {
-                        AwesomeMap.config.colorTextCleared
-                    }
-                ).rgb alphaScale mapAlpha
-
-//            if (AwesomeMap.config.mapRotate) {
-//                GlStateManager.rotate(MC.thePlayer.rotationYaw + 180f, 0f, 0f, 1f)
-//            } else if (AwesomeMap.config.mapDynamicRotate) {
-//                GlStateManager.rotate(-MapRender.dynamicRotation, 0f, 0f, 1f)
-//            }
-
-            if (AwesomeMap.config.mapRoomSecrets == 2) {
-                nvg.drawTextSegments(
+            if (config.mapRotateMode != 0) {
+                nvg.rotate(
                     vg,
-                    "${uniqueRoom.mainRoom.data.secrets}".toStyledSegments(),
-                    ttr posX (xOffsetName + MapUtils.halfRoomSize).double,
-                    ttr posY (yOffsetName + MapUtils.halfRoomSize + 6 * AwesomeMap.config.textScale).double,
-                    ttr size 16.0 * AwesomeMap.config.textScale,
-                    fontMedium(),
-                    color = color,
-                    anchor = Vec2D(0.5, 0.0),
+                    when (config.mapRotateMode) {
+                        1 -> MC.thePlayer.rotationYaw + 180.0
+                        2 -> -MapRender.dynamicRotation.double
+                        else -> MC.thePlayer.rotationYaw + 180.0
+                    } * PI / 180.0,
                 )
             }
 
+            if (config.mapCheckmark && config.mapRoomSecrets != 2) {
+                val state = uniqueRoom.mainRoom.state
+
+                val color =
+                    when (state) {
+                        RoomState.CLEARED -> config.colorCheckMarkCleared.rgb
+                        RoomState.FAILED -> config.colorCheckMarkFailed.rgb
+                        RoomState.GREEN -> config.colorCheckMarkGreen.rgb
+                        else -> 0
+                    }
+
+                if (state == RoomState.FAILED) {
+                    nvg.drawCrossMark(
+                        vg,
+                        ttr size -6.0,
+                        ttr size -6.0,
+                        ttr size 12.0,
+                        ttr size 1.5,
+                        color,
+                    )
+                } else {
+                    nvg.drawCheckMark(
+                        vg,
+                        ttr size -6.0,
+                        ttr size -6.0,
+                        ttr size 12.0,
+                        ttr size 1.5,
+                        color,
+                    )
+                }
+            }
+
+            val color =
+                (
+                    if (config.mapColorText) {
+                        when (uniqueRoom.mainRoom.state) {
+                            RoomState.GREEN -> config.colorTextGreen
+                            RoomState.CLEARED -> config.colorTextCleared
+                            RoomState.FAILED -> config.colorTextFailed
+                            else -> config.colorTextUncleared
+                        }
+                    } else {
+                        config.colorTextCleared
+                    }
+                ).rgb alphaScale mapAlpha
+
+            if (config.mapRoomSecrets == 2) {
+                nvg.drawTextSegments(
+                    vg,
+                    "${uniqueRoom.mainRoom.data.secrets}".toStyledSegments(),
+                    .0,
+                    ttr size FONT_MEDIUM_Y_OFFSET.double,
+                    ttr size 16.0 * config.textScale,
+                    fontMedium(),
+                    color = color,
+                    anchor = Vec2D(0.5, 0.5),
+                )
+            }
+
+            nvg.restore(vg)
+        }
+
+        uniqueRooms.forEach { uniqueRoom ->
+            val namePos = uniqueRoom.getNamePosition()
+            val xOffsetName = (namePos.first / 2f) * (MapUtils.roomSize + MapUtils.connectorSize)
+            val yOffsetName = (namePos.second / 2f) * (MapUtils.roomSize + MapUtils.connectorSize)
+
+            val color =
+                (
+                    if (config.mapColorText) {
+                        when (uniqueRoom.mainRoom.state) {
+                            RoomState.GREEN -> config.colorTextGreen
+                            RoomState.CLEARED -> config.colorTextCleared
+                            RoomState.FAILED -> config.colorTextFailed
+                            else -> config.colorTextUncleared
+                        }
+                    } else {
+                        config.colorTextCleared
+                    }
+                ).rgb alphaScale mapAlpha
+
             val name = mutableListOf<String>()
 
-            if (AwesomeMap.config.mapRoomNames != 0 &&
+            if (config.mapRoomNames != 0 &&
                 uniqueRoom.mainRoom.data.type.equalsOneOf(
                     RoomType.PUZZLE,
                     RoomType.TRAP,
                 ) ||
-                AwesomeMap.config.mapRoomNames == 2 &&
+                config.mapRoomNames == 2 &&
                 uniqueRoom.mainRoom.data.type.equalsOneOf(
                     RoomType.NORMAL,
                     RoomType.RARE,
@@ -266,7 +287,7 @@ data class AwesomeMapWidget(
                 )
             }
 
-            if (uniqueRoom.mainRoom.data.type == RoomType.NORMAL && AwesomeMap.config.mapRoomSecrets == 1) {
+            if (uniqueRoom.mainRoom.data.type == RoomType.NORMAL && config.mapRoomSecrets == 1) {
                 name.add(
                     uniqueRoom.mainRoom.data.secrets
                         .toString(),
@@ -274,22 +295,49 @@ data class AwesomeMapWidget(
             }
 
             name.forEachIndexed { i, it ->
-                val size = AwesomeMap.config.textScale * 8.0
+                val size = config.textScale * 8.0
+
+                nvg.save(vg)
+                nvg.translate(
+                    vg,
+                    Vec2D(
+                        ttr posX (xOffsetName + MapUtils.halfRoomSize).double,
+                        ttr posY (yOffsetName + MapUtils.halfRoomSize).double,
+                    ),
+                )
+
+                if (config.mapRotateMode != 0) {
+                    nvg.rotate(
+                        vg,
+                        when (config.mapRotateMode) {
+                            1 -> MC.thePlayer.rotationYaw + 180.0
+                            2 -> -MapRender.dynamicRotation.double
+                            else -> MC.thePlayer.rotationYaw + 180.0
+                        } * PI / 180.0,
+                    )
+                }
+
+                nvg.translate(
+                    vg,
+                    Vec2D(
+                        .0,
+                        ttr size -size * name.size / 2 + size * (i + 0.5),
+                    ),
+                )
+
                 nvg.drawTextSegments(
                     vg,
                     it.toStyledSegments(),
-                    ttr posX (xOffsetName + MapUtils.halfRoomSize).double,
-                    ttr posY (yOffsetName + MapUtils.halfRoomSize).double - size * name.size / 2 + size * (i + 0.5),
+                    0.0,
+                    0.0,
                     ttr size size,
                     fontSemiBold(),
                     color = color,
-                    anchor = Vec2D(0.5, 0.0),
+                    anchor = Vec2D(0.5, 0.5),
                 )
-            }
 
-//            if (AwesomeMap.config.mapDynamicRotate) {
-//                GlStateManager.rotate(MapRender.dynamicRotation, 0f, 0f, 1f)
-//            }
+                nvg.restore(vg)
+            }
         }
     }
 
@@ -299,13 +347,13 @@ data class AwesomeMapWidget(
                 RoomState.UNDISCOVERED,
                 RoomState.UNOPENED,
             ) &&
-            !MapRender.legitRender &&
+            !legitRender &&
             Dungeon.Info.startTime != 0L
         ) {
-            if (AwesomeMap.config.mapDarkenUndiscovered) {
-                color = color.darken(1 - AwesomeMap.config.mapDarkenPercent)
+            if (config.mapDarkenUndiscovered) {
+                color = color.darken(1 - config.mapDarkenPercent)
             }
-            if (AwesomeMap.config.mapGrayUndiscovered) {
+            if (config.mapGrayUndiscovered) {
                 color = color.grayScale()
             }
         }
@@ -318,7 +366,7 @@ data class AwesomeMapWidget(
                 drawPlayerHead(
                     tr,
                     MC.thePlayer.name,
-                    DungeonPlayer(MC.thePlayer.locationSkin).apply {
+                    DungeonPlayer(MC.thePlayer.locationSkin, MC.thePlayer.uniqueID).apply {
                         yaw = MC.thePlayer.rotationYaw
                     },
                 )
@@ -343,25 +391,39 @@ data class AwesomeMapWidget(
         nvg.scale(vg, Vec2D(tr.scale, tr.scale))
         nvg.translate(vg, Vec2D(1.0, 1.0))
         try {
-            // Translates to the player's location which is updated every tick.
-            if (player.isPlayer || name == MC.thePlayer.name) {
+            val isLocalPlayer = player.isPlayer || name == MC.thePlayer.name
+
+            // Translates to the player's location, which is updated every tick.
+            if (isLocalPlayer) {
                 nvg.translate(
                     vg,
                     Vec2D(
-                        (MC.thePlayer.posX - DungeonScan.START_X + 15) * MapUtils.coordMultiplier + MapUtils.startCorner.first,
-                        (MC.thePlayer.posZ - DungeonScan.START_Z + 15) * MapUtils.coordMultiplier + MapUtils.startCorner.second,
+                        (MC.thePlayer.renderPos.x - DungeonScan.START_X + 15) * MapUtils.coordMultiplier + MapUtils.startCorner.first,
+                        (MC.thePlayer.renderPos.z - DungeonScan.START_Z + 15) * MapUtils.coordMultiplier + MapUtils.startCorner.second,
                     ),
                 )
             } else {
-                nvg.translate(vg, Vec2D(player.mapX.toFloat(), player.mapZ.toFloat()))
+                nvg.translate(
+                    vg,
+                    Vec2D(
+                        lerp(player.prevPosition.mapX, player.position.mapX, partialTicks),
+                        lerp(player.prevPosition.mapZ, player.position.mapZ, partialTicks),
+                    ),
+                )
             }
 
-            // Apply head rotation and scaling
-            nvg.rotate(vg, (player.yaw + 180.0) * PI / 180.0)
-            nvg.scale(vg, Vec2D(1 / tr.scale, 1 / tr.scale))
-            val ttr = Transformation() * tr.scale * AwesomeMap.config.playerHeadScale.double
+            // Apply head rotation
+            if (isLocalPlayer) {
+                nvg.rotate(vg, (MC.thePlayer.rotationYaw + 180.0) * PI / 180.0)
+            } else {
+                nvg.rotate(vg, (player.getRenderYaw() + 180.0) * PI / 180.0)
+            }
 
-            if (AwesomeMap.config.mapVanillaMarker && (player.isPlayer || name == MC.thePlayer.name)) {
+            // Apply scaling
+            nvg.scale(vg, Vec2D(1 / tr.scale, 1 / tr.scale))
+            val ttr = Transformation() * tr.scale * config.playerHeadScale.double
+
+            if (config.mapVanillaMarker && (player.isPlayer || name == MC.thePlayer.name)) {
                 nvg.drawRoundedTexture(
                     vg,
                     cache["marker"],
@@ -391,37 +453,48 @@ data class AwesomeMapWidget(
                     ttr size 12.0,
                     ttr size 12.0,
                     mapAlpha,
-                    ttr size EnchAddonsConfig.dungeonConfig.awesomeMapConfig.playerHeadRadius.double,
+                    ttr size config.playerHeadRadius.double,
                 )
             }
 
             // Handle player names
-            if (AwesomeMap.config.playerHeads == 2 ||
-                AwesomeMap.config.playerHeads == 1 &&
+            if (config.playerHeads == 2 ||
+                config.playerHeads == 1 &&
                 MC.thePlayer.heldItem?.itemID.equalsOneOf(
                     "SPIRIT_LEAP",
                     "INFINITE_SPIRIT_LEAP",
                     "HAUNT_ABILITY",
                 )
             ) {
-                if (!AwesomeMap.config.mapRotate) {
+                if (config.mapRotateMode != 1) {
                     nvg.save(vg)
-                    nvg.rotate(vg, (-player.yaw + 180.0) * PI / 180.0)
+                    val rotateAngle =
+                        if (isLocalPlayer) {
+                            -MC.thePlayer.rotationYaw.double
+                        } else {
+                            -player.getRenderYaw()
+                        } +
+                            if (config.mapRotateMode == 2) {
+                                -MapRender.dynamicRotation.double
+                            } else {
+                                .0
+                            }
+                    nvg.rotate(vg, (rotateAngle + 180.0) * PI / 180.0)
                 }
 
                 nvg.drawTextSegments(
                     vg,
                     name.toStyledSegments(),
                     ttr posX 0.0,
-                    ttr posY 12.0,
-                    ttr size 8.0 * AwesomeMap.config.playerNameScale,
+                    ttr posY 8.0,
+                    ttr size 8.0 * config.playerNameScale,
                     fontSemiBold(),
                     color = 0xFFFFFFFF.int alphaScale mapAlpha,
                     anchor = Vec2D(0.5, 0.0),
                     shadow = Vec2D(1 / 16.0, 1 / 16.0) to 0.25,
                 )
 
-                if (!AwesomeMap.config.mapRotate) {
+                if (config.mapRotateMode != 1) {
                     nvg.restore(vg)
                 }
             }
@@ -433,7 +506,7 @@ data class AwesomeMapWidget(
 
     private fun NanoVGUIContext.drawRunInfo(tr: Transformation) {
         nvg.loadFonts(vg)
-        val ttr = tr + Vec2D(64.0, 134.0)
+        val ttr = tr + Vec2D(64.0, 130.0)
         val lines = ScoreElement.runInformationLines()
         val lineOne = lines.takeWhile { it != "split" }.joinToString(separator = "  ")
         val lineTwo = lines.takeLastWhile { it != "split" }.joinToString(separator = "  ")

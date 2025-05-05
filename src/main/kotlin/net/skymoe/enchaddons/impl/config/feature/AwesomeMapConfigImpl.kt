@@ -68,13 +68,23 @@ class AwesomeMapConfigImpl :
     )
     var mapLShapeRoomInnerRadius = 2.0f
 
-    @Switch(
-        name = "Rotate Map",
-        description = "Rotates map to follow the player.",
+    @Number(
+        name = "Room Connector Width",
+        category = "Map",
+        subcategory = "Room Render",
+        min = 0F,
+        max = 16F,
+    )
+    var mapRoomConnector = 6.0f
+
+    @Dropdown(
+        name = "Rotate Mode",
+        description = "Rotates map to specific mode.",
         category = "Map",
         subcategory = "Tweaks",
+        options = ["Off", "Player Direction", "Entrance Room At Bottom"],
     )
-    override var mapRotate = false
+    override var mapRotateMode = 2
 
     @Switch(
         name = "Center Map",
@@ -83,14 +93,6 @@ class AwesomeMapConfigImpl :
         subcategory = "Tweaks",
     )
     override var mapCenter = false
-
-    @Switch(
-        name = "Dynamic Rotate",
-        description = "Keeps the entrance room at the bottom. Does not work with rotate map.",
-        category = "Map",
-        subcategory = "Tweaks",
-    )
-    override var mapDynamicRotate = false
 
     @Switch(
         name = "Hide In Boss",
@@ -116,6 +118,14 @@ class AwesomeMapConfigImpl :
         subcategory = "Tweaks",
     )
     override var mapVanillaMarker = false
+
+    @Switch(
+        name = "Clip Map",
+        description = "Clip map which out of the HUD region.",
+        category = "Map",
+        subcategory = "Tweaks",
+    )
+    override var mapClip = true
 
     @Slider(
         name = "Map Text Scale",
@@ -217,14 +227,13 @@ class AwesomeMapConfigImpl :
     )
     override var mapColorText = true
 
-    @Dropdown(
-        name = "Room Checkmarks",
+    @Switch(
+        name = "Room Checkmark",
         description = "Adds room checkmarks based on room state.",
         category = "Rooms",
         subcategory = "Checkmarks",
-        options = ["None", "Default", "NEU", "Legacy"],
     )
-    override var mapCheckmark = 1
+    override var mapCheckmark = true
 
     @Switch(
         name = "Center Room Checkmarks",
@@ -240,7 +249,7 @@ class AwesomeMapConfigImpl :
         subcategory = "Doors",
         allowAlpha = true,
     )
-    override var colorBloodDoor = OneColor(231, 0, 0)
+    var colorBloodDoor = OneColor(231, 0, 0)
 
     @Color(
         name = "Entrance Door",
@@ -248,7 +257,7 @@ class AwesomeMapConfigImpl :
         subcategory = "Doors",
         allowAlpha = true,
     )
-    override var colorEntranceDoor = OneColor(20, 133, 0)
+    var colorEntranceDoor = OneColor(20, 133, 0)
 
     @Color(
         name = "Normal Door",
@@ -256,7 +265,7 @@ class AwesomeMapConfigImpl :
         subcategory = "Doors",
         allowAlpha = true,
     )
-    override var colorRoomDoor = OneColor(92, 52, 14)
+    var colorRoomDoor = OneColor(92, 52, 14)
 
     @Color(
         name = "Wither Door",
@@ -264,7 +273,7 @@ class AwesomeMapConfigImpl :
         subcategory = "Doors",
         allowAlpha = true,
     )
-    override var colorWitherDoor = OneColor(0, 0, 0)
+    var colorWitherDoor = OneColor(0, 0, 0)
 
     @Color(
         name = "Opened Wither Door",
@@ -272,7 +281,7 @@ class AwesomeMapConfigImpl :
         subcategory = "Doors",
         allowAlpha = true,
     )
-    override var colorOpenWitherDoor = OneColor(92, 52, 14)
+    var colorOpenWitherDoor = OneColor(92, 52, 14)
 
     @Color(
         name = "Unopened Door",
@@ -280,7 +289,7 @@ class AwesomeMapConfigImpl :
         subcategory = "Doors",
         allowAlpha = true,
     )
-    override var colorUnopenedDoor = OneColor(65, 65, 65)
+    var colorUnopenedDoor = OneColor(65, 65, 65)
 
     @Color(
         name = "Blood Room",
@@ -288,7 +297,7 @@ class AwesomeMapConfigImpl :
         subcategory = "Rooms",
         allowAlpha = true,
     )
-    override var colorBlood = OneColor(255, 0, 0)
+    var colorBlood = OneColor(255, 0, 0)
 
     @Color(
         name = "Entrance Room",
@@ -296,7 +305,7 @@ class AwesomeMapConfigImpl :
         subcategory = "Rooms",
         allowAlpha = true,
     )
-    override var colorEntrance = OneColor(20, 133, 0)
+    var colorEntrance = OneColor(20, 133, 0)
 
     @Color(
         name = "Fairy Room",
@@ -304,7 +313,7 @@ class AwesomeMapConfigImpl :
         subcategory = "Rooms",
         allowAlpha = true,
     )
-    override var colorFairy = OneColor(224, 0, 255)
+    var colorFairy = OneColor(224, 0, 255)
 
     @Color(
         name = "Miniboss Room",
@@ -312,7 +321,7 @@ class AwesomeMapConfigImpl :
         subcategory = "Rooms",
         allowAlpha = true,
     )
-    override var colorMiniboss = OneColor(254, 223, 0)
+    var colorMiniboss = OneColor(254, 223, 0)
 
     @Color(
         name = "Normal Room",
@@ -320,7 +329,7 @@ class AwesomeMapConfigImpl :
         subcategory = "Rooms",
         allowAlpha = true,
     )
-    override var colorRoom = OneColor(107, 58, 17)
+    var colorRoom = OneColor(107, 58, 17)
 
     @Color(
         name = "Mimic Room",
@@ -328,7 +337,7 @@ class AwesomeMapConfigImpl :
         subcategory = "Rooms",
         allowAlpha = true,
     )
-    override var colorRoomMimic = OneColor(186, 66, 52)
+    var colorRoomMimic = OneColor(186, 66, 52)
 
     @Color(
         name = "Puzzle Room",
@@ -336,7 +345,7 @@ class AwesomeMapConfigImpl :
         subcategory = "Rooms",
         allowAlpha = true,
     )
-    override var colorPuzzle = OneColor(117, 0, 133)
+    var colorPuzzle = OneColor(117, 0, 133)
 
     @Color(
         name = "Rare Room",
@@ -344,7 +353,7 @@ class AwesomeMapConfigImpl :
         subcategory = "Rooms",
         allowAlpha = true,
     )
-    override var colorRare = OneColor(255, 203, 89)
+    var colorRare = OneColor(255, 203, 89)
 
     @Color(
         name = "Trap Room",
@@ -352,7 +361,7 @@ class AwesomeMapConfigImpl :
         subcategory = "Rooms",
         allowAlpha = true,
     )
-    override var colorTrap = OneColor(216, 127, 51)
+    var colorTrap = OneColor(216, 127, 51)
 
     @Color(
         name = "Unopened Room",
@@ -360,39 +369,63 @@ class AwesomeMapConfigImpl :
         subcategory = "Rooms",
         allowAlpha = true,
     )
-    override var colorUnopened = OneColor(65, 65, 65)
+    var colorUnopened = OneColor(65, 65, 65)
 
     @Color(
-        name = "Cleared Room Text",
+        name = "Cleared Room",
         category = "Colors",
         subcategory = "Text",
         allowAlpha = true,
     )
-    override var colorTextCleared = OneColor(255, 255, 255)
+    var colorTextCleared = OneColor(255, 255, 255)
 
     @Color(
-        name = "Uncleared Room Text",
+        name = "Uncleared Room",
         category = "Colors",
         subcategory = "Text",
         allowAlpha = true,
     )
-    override var colorTextUncleared = OneColor(170, 170, 170)
+    var colorTextUncleared = OneColor(170, 170, 170)
 
     @Color(
-        name = "Green Room Text",
+        name = "Green Room",
         category = "Colors",
         subcategory = "Text",
         allowAlpha = true,
     )
-    override var colorTextGreen = OneColor(85, 255, 85)
+    var colorTextGreen = OneColor(85, 255, 85)
 
     @Color(
-        name = "Failed Room Text",
+        name = "Failed Room",
         category = "Colors",
         subcategory = "Text",
         allowAlpha = true,
     )
-    override var colorTextFailed = OneColor(255, 255, 255)
+    var colorTextFailed = OneColor(255, 255, 255)
+
+    @Color(
+        name = "Cleared Room",
+        category = "Colors",
+        subcategory = "CheckMark",
+        allowAlpha = true,
+    )
+    var colorCheckMarkCleared = OneColor(255, 255, 255)
+
+    @Color(
+        name = "Green Room",
+        category = "Colors",
+        subcategory = "CheckMark",
+        allowAlpha = true,
+    )
+    var colorCheckMarkGreen = OneColor(85, 255, 85)
+
+    @Color(
+        name = "Failed Room",
+        category = "Colors",
+        subcategory = "Text",
+        allowAlpha = true,
+    )
+    var colorCheckMarkFailed = OneColor(255, 255, 255)
 
     @Switch(
         name = "Show Score",
@@ -542,11 +575,116 @@ class AwesomeMapConfigImpl :
     override var runInformationDeaths = true
 
     @Text(
-        name = "Hypixel API Key",
-        category = "Other Features",
-        secure = true,
+        name = "Score",
+        category = "Placeholder",
+        subcategory = "Full",
     )
-    override var apiKey = ""
+    var textScore = "Score"
+
+    @Text(
+        name = "Secrets",
+        category = "Placeholder",
+        subcategory = "Full",
+    )
+    var textSecrets = "Secrets"
+
+    @Text(
+        name = "Crypts",
+        category = "Placeholder",
+        subcategory = "Full",
+    )
+    var textCrypts = "Crypts"
+
+    @Text(
+        name = "Mimic",
+        category = "Placeholder",
+        subcategory = "Full",
+    )
+    var textMimic = "Mimic"
+
+    @Text(
+        name = "Mimic Yes",
+        category = "Placeholder",
+        subcategory = "Full",
+    )
+    var textMimicYes = "✔"
+
+    @Text(
+        name = "Mimic No",
+        category = "Placeholder",
+        subcategory = "Full",
+    )
+    var textMimicNo = "✘"
+
+    @Text(
+        name = "Death",
+        category = "Placeholder",
+        subcategory = "Full",
+    )
+    var textDeaths = "Deaths"
+
+    @Text(
+        name = "Puzzles",
+        category = "Placeholder",
+        subcategory = "Full",
+    )
+    var textPuzzles = "Puzzles"
+
+    @Text(
+        name = "Score",
+        category = "Placeholder",
+        subcategory = "Minimized",
+    )
+    var textMinimizedScore = ""
+
+    @Text(
+        name = "Secrets",
+        category = "Placeholder",
+        subcategory = "Minimized",
+    )
+    var textMinimizedSecrets = ""
+
+    @Text(
+        name = "Crypts",
+        category = "Placeholder",
+        subcategory = "Minimized",
+    )
+    var textMinimizedCrypts = "C"
+
+    @Text(
+        name = "Mimic",
+        category = "Placeholder",
+        subcategory = "Minimized",
+    )
+    var textMinimizedMimic = "M"
+
+    @Text(
+        name = "Mimic Yes",
+        category = "Placeholder",
+        subcategory = "Minimized",
+    )
+    var textMinimizedMimicYes = "✔"
+
+    @Text(
+        name = "Mimic No",
+        category = "Placeholder",
+        subcategory = "Minimized",
+    )
+    var textMinimizedMimicNo = "✘"
+
+    @Text(
+        name = "Death",
+        category = "Placeholder",
+        subcategory = "Minimized",
+    )
+    var textMinimizedDeaths = "D"
+
+    @Text(
+        name = "Puzzles",
+        category = "Placeholder",
+        subcategory = "Minimized",
+    )
+    var textMinimizedPuzzles = "P"
 
     @Switch(
         name = "Show Team Info",
@@ -555,70 +693,49 @@ class AwesomeMapConfigImpl :
     )
     override var teamInfo = false
 
-    @Switch(
-        name = "Mimic Message",
-        description = "Sends party message when a mimic is killed. Detects most instant kills.",
-        category = "Other Features",
-        subcategory = "Mimic Message",
-    )
-    override var mimicMessageEnabled = false
-
-    @Text(
-        name = "Mimic Message Text",
-        category = "Other Features",
-        subcategory = "Mimic Message",
-    )
-    override var mimicMessage = "Mimic Killed!"
-
     @Dropdown(
         name = "Wither Door ESP",
         description = "Boxes unopened wither doors.",
-        category = "Other Features",
-        subcategory = "Wither Door",
+        category = "Wither Door",
         options = ["Off", "First", "All"],
     )
     override var witherDoorESP = 0
 
     @Color(
         name = "No Key Color",
-        category = "Other Features",
-        subcategory = "Wither Door",
+        category = "Wither Door",
         allowAlpha = true,
     )
-    override var witherDoorNoKeyColor = OneColor(255, 0, 0)
+    var witherDoorNoKeyColor = OneColor(255, 0, 0)
 
     @Color(
         name = "Has Key Color",
-        category = "Other Features",
-        subcategory = "Wither Door",
+        category = "Wither Door",
         allowAlpha = true,
     )
-    override var witherDoorKeyColor = OneColor(0, 255, 0)
+    var witherDoorKeyColor = OneColor(0, 255, 0)
 
     @Slider(
         name = "Door Outline Width",
-        category = "Other Features",
-        subcategory = "Wither Door",
-        min = 1f,
+        category = "Wither Door",
+        min = 0f,
         max = 10f,
     )
     override var witherDoorOutlineWidth = 3f
 
     @Slider(
         name = "Door Outline Opacity",
-        category = "Other Features",
-        subcategory = "Wither Door",
+        category = "Wither Door",
         min = 0F,
-        max = 10F,
+        max = 1F,
     )
     override var witherDoorOutline = 1f
 
     @Slider(
         name = "Door Fill Opacity",
-        category = "Other Features",
-        subcategory = "Wither Door",
+        category = "Wither Door",
         min = 0F,
-        max = 10F,
+        max = 1F,
     )
     override var witherDoorFill = 0.25f
 

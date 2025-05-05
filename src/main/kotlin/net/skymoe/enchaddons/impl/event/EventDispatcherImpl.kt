@@ -7,8 +7,8 @@ import net.skymoe.enchaddons.util.general.AnyComparator
 import net.skymoe.enchaddons.util.general.UniqueHash
 import net.skymoe.enchaddons.util.general.inBox
 import net.skymoe.enchaddons.util.prepend
-import java.util.concurrent.locks.ReentrantReadWriteLock
 import java.util.TreeSet
+import java.util.concurrent.locks.ReentrantReadWriteLock
 import kotlin.concurrent.read
 import kotlin.concurrent.write
 import kotlin.reflect.KClass
@@ -24,21 +24,20 @@ class EventDispatcherImpl : EventDispatcher {
         val priority: Int,
         val handler: EventHandler<*>,
     ) : Comparable<RegistryEntry> {
-        override fun compareTo(other: RegistryEntry): Int {
-            return if (handler === other.handler) {
+        override fun compareTo(other: RegistryEntry): Int =
+            if (handler === other.handler) {
                 0
             } else {
-                priority.compareTo(other.priority)
+                priority
+                    .compareTo(other.priority)
                     .takeIf { it != 0 }
                     ?: anyComparator.compare(handler, other.handler)
             }
-        }
 
-        override fun equals(other: Any?): Boolean {
-            return (other as? RegistryEntry)?.let {
-                return handler === other.handler
+        override fun equals(other: Any?): Boolean =
+            (other as? RegistryEntry)?.let {
+                handler === other.handler
             } ?: false
-        }
 
         override fun hashCode() = handler.hashCode()
     }
@@ -54,7 +53,11 @@ class EventDispatcherImpl : EventDispatcher {
         onlyHandlerCache.clear()
     }
 
-    override fun <T : Event> register(type: KClass<T>, priority: Int, handler: EventHandler<T>) {
+    override fun <T : Event> register(
+        type: KClass<T>,
+        priority: Int,
+        handler: EventHandler<T>,
+    ) {
         lock.write {
             clearCache()
             unregister(type, handler)
@@ -62,7 +65,11 @@ class EventDispatcherImpl : EventDispatcher {
         }
     }
 
-    override fun <T : Event> registerOnly(type: KClass<T>, priority: Int, handler: EventHandler<T>) {
+    override fun <T : Event> registerOnly(
+        type: KClass<T>,
+        priority: Int,
+        handler: EventHandler<T>,
+    ) {
         lock.write {
             clearCache()
             unregisterOnly(type, handler)
@@ -70,7 +77,10 @@ class EventDispatcherImpl : EventDispatcher {
         }
     }
 
-    override fun <T : Event> unregister(type: KClass<T>, handler: EventHandler<T>) {
+    override fun <T : Event> unregister(
+        type: KClass<T>,
+        handler: EventHandler<T>,
+    ) {
         lock.write {
             clearCache()
             val entry = RegistryEntry(0, handler)
@@ -80,7 +90,10 @@ class EventDispatcherImpl : EventDispatcher {
         }
     }
 
-    override fun <T : Event> unregisterOnly(type: KClass<T>, handler: EventHandler<T>) {
+    override fun <T : Event> unregisterOnly(
+        type: KClass<T>,
+        handler: EventHandler<T>,
+    ) {
         lock.write {
             clearCache()
             val entry = RegistryEntry(0, handler)

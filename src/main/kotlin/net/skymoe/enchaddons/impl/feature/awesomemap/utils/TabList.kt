@@ -5,6 +5,7 @@ import com.google.common.collect.Ordering
 import net.minecraft.client.network.NetworkPlayerInfo
 import net.minecraft.world.WorldSettings
 import net.skymoe.enchaddons.util.MC
+import java.util.UUID
 
 object TabList {
     private val tabListOrder =
@@ -34,4 +35,12 @@ object TabList {
         getTabList().let {
             if (it.size > 18 && it[0].second.contains("§r§b§lParty §r§f(")) it else null
         }
+
+    fun getPlayerUUIDByName(name: String): UUID? =
+        getTabList()
+            .firstOrNull {
+                it.first.gameProfile.name == name
+            }?.first
+            ?.gameProfile
+            ?.id
 }

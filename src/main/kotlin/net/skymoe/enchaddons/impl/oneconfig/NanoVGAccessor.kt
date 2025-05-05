@@ -17,7 +17,9 @@ var fontMediumInstance: Font by latelet()
 var fontSemiBoldInstance: Font by latelet()
 
 val fontMedium = { fontMediumInstance }
+const val FONT_MEDIUM_Y_OFFSET = 0.5
 val fontSemiBold = { fontSemiBoldInstance }
+const val FONT_SEMIBOLD_Y_OFFSET = 0.1
 
 fun NanoVGAccessor.fuckOneConfigFont(vg: Long) {
     if (!fallbackFontLoaded) {
@@ -113,6 +115,16 @@ interface NanoVGAccessor {
         images: Set<Int>,
     )
 
+    fun scissor(
+        vg: Long,
+        x: Double,
+        y: Double,
+        width: Double,
+        height: Double,
+    )
+
+    fun resetScissor(vg: Long)
+
     fun drawRoundedImage(
         vg: Long,
         image: Int,
@@ -126,6 +138,24 @@ interface NanoVGAccessor {
         height: Double,
         alpha: Double,
         radius: Double,
+    )
+
+    fun drawCheckMark(
+        vg: Long,
+        x: Double,
+        y: Double,
+        size: Double,
+        lineWidth: Double,
+        color: Int,
+    )
+
+    fun drawCrossMark(
+        vg: Long,
+        x: Double,
+        y: Double,
+        size: Double,
+        lineWidth: Double,
+        color: Int,
     )
 
     fun drawRingRectRounded(
