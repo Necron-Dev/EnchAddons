@@ -422,7 +422,7 @@ class AwesomeMapConfigImpl :
     @Color(
         name = "Failed Room",
         category = "Colors",
-        subcategory = "Text",
+        subcategory = "CheckMark",
         allowAlpha = true,
     )
     var colorCheckMarkFailed = OneColor(255, 255, 255)
