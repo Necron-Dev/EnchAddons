@@ -20,7 +20,6 @@ interface AwesomeMapConfig : FeatureConfig {
 
     val textScale: Float
     val vanillaMarkerScale: Float
-    val colorBorderSize: Float
     val playerHeadScale: Float
     val playerNameScale: Float
 

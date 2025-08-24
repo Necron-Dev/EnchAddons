@@ -192,7 +192,7 @@ class AwesomeMapConfigImpl :
         min = 0F,
         max = 2F,
     )
-    override var colorBorderSize = 1f
+    var colorBorderSize = 1f
 
     @Slider(
         name = "Player Name Scale",
