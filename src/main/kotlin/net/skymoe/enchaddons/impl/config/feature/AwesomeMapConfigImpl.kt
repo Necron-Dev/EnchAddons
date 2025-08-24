@@ -185,14 +185,14 @@ class AwesomeMapConfigImpl :
     var playerHeadRadius = 2.0f
 
     @Slider(
-        name = "Class Color Border Size",
-        description = "Scale of player heads relative to map size.",
+        name = "Class Color Border Width",
+        description = "Width of player heads border.",
         category = "Map",
         subcategory = "Size",
         min = 0F,
         max = 2F,
     )
-    var colorBorderSize = 1f
+    var colorBorderWidth = 1f
 
     @Slider(
         name = "Player Name Scale",

@@ -1,8 +1,6 @@
 package net.skymoe.enchaddons.impl.feature.awesomemap
 
-import net.minecraft.util.ResourceLocation
 import net.skymoe.enchaddons.impl.config.feature.AwesomeMapConfigImpl
-import net.skymoe.enchaddons.impl.feature.awesomemap.awesomeMapPlayerMarker
 import net.skymoe.enchaddons.impl.feature.awesomemap.core.DungeonPlayer
 import net.skymoe.enchaddons.impl.feature.awesomemap.core.map.*
 import net.skymoe.enchaddons.impl.feature.awesomemap.features.dungeon.Dungeon
@@ -482,7 +480,7 @@ data class AwesomeMapWidget(
                     // Draw border for teammates (not using vanilla marker)
                     if (!isLocalPlayer || !config.mapVanillaMarker) {
                         val borderColor = getClassColor(DungeonClass.fromCode(player.dungeonClass))
-                        val borderSize = 1.0 // Direct implementation instead of config override
+                        val borderSize = config.colorBorderWidth.double
                         nvg.drawRoundedRectBorder(
                             vg,
                             ttr posX (-6.0 - borderSize / 2),
