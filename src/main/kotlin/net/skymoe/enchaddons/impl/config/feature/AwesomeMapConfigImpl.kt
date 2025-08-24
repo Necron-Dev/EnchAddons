@@ -130,7 +130,7 @@ class AwesomeMapConfigImpl :
 
     @Switch(
         name = "Head Color Border",
-        description = "Add color border to plaer heads",
+        description = "Add color border to player heads",
         category = "Map",
         subcategory = "Tweaks",
     )
