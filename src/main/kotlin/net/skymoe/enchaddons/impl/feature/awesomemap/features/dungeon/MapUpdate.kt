@@ -19,6 +19,19 @@ import net.skymoe.enchaddons.util.math.double
 object MapUpdate {
     var roomAdded = false
 
+    // Regex pattern to match dungeon tab entries
+    // Format: [level] name (class level) or (EMPTY) or (DEAD)
+    private val classPattern = Regex(
+        "(?:\\[\\d+\\] )?" +  // Optional level in brackets
+                "(\\w+)" +              // Player name
+                ".*?\\(" +              // Everything until opening parenthesis
+                "(?:" +
+                "(Archer|Berserk|Healer|Mage|Tank) ([ILXV]+)" +  // Class and level
+                "|EMPTY" +               // Or EMPTY
+                "|DEAD" +                // Or DEAD
+                ")\\)"                   // Closing parenthesis
+    )
+
     fun preloadHeads() {
         val tabEntries = TabList.getDungeonTabList() ?: return
         for (i in listOf(5, 9, 13, 17, 1)) {
@@ -31,26 +44,57 @@ object MapUpdate {
         val tabEntries = TabList.getDungeonTabList() ?: return
         Dungeon.dungeonTeammates.clear()
         var iconNum = 0
+        println("[AwesomeMap Debug] Starting player detection...")
         for (i in listOf(5, 9, 13, 17, 1)) {
             with(tabEntries[i]) {
+                val strippedEntry = StringUtils.stripControlCodes(second)
+
                 val name =
                     StringUtils
                         .stripControlCodes(second)
                         .trim()
                         .substringAfterLast("] ")
                         .split(" ")[0]
+
                 if (name != "") {
+                    var dungeonClass = '?'
+
+                    // Look for class info in parentheses
+                    if (strippedEntry.contains("(") && strippedEntry.contains(")")) {
+                        val parenContent = strippedEntry.substringAfterLast("(").substringBefore(")")
+
+                        // Check if it's not EMPTY or DEAD
+                        if (parenContent != "EMPTY" && parenContent != "DEAD") {
+                            // Parse class from format like "Mage XL" or "Tank L"
+                            val classInfo = parenContent.split(" ")[0]
+
+                            dungeonClass = when (classInfo) {
+                                "Tank" -> 'T'
+                                "Archer" -> 'A'
+                                "Berserk" -> 'B'
+                                "Mage" -> 'M'
+                                "Healer" -> 'H'
+                                else -> {
+                                    println("[AwesomeMap Debug] Unknown class: '$classInfo'")
+                                    '?'
+                                }
+                            }
+                        }
+                    }
+
                     Dungeon.dungeonTeammates[name] =
                         DungeonPlayer(first.locationSkin, TabList.getPlayerUUIDByName(name)).apply {
                             MC.theWorld.getPlayerEntityByName(name)?.let { setData(it) }
                             colorPrefix = second.substringBefore(name, "f").last()
                             this.name = name
+                            this.dungeonClass = dungeonClass
                             icon = "icon-$iconNum"
                         }
                     iconNum++
                 }
             }
         }
+
     }
 
     fun updatePlayers(tabEntries: List<Pair<NetworkPlayerInfo, String>>) {
@@ -64,6 +108,26 @@ object MapUpdate {
             if (name == "") continue
             Dungeon.dungeonTeammates[name]?.run {
                 dead = tabText.contains("(DEAD)")
+
+                // Update class info if it was previously unknown
+                if (dungeonClass == '?' && tabText.contains("(") && tabText.contains(")")) {
+                    val parenContent = tabText.substringAfterLast("(").substringBefore(")")
+                    if (parenContent != "EMPTY" && parenContent != "DEAD") {
+                        val classInfo = parenContent.split(" ")[0]
+                        dungeonClass = when (classInfo) {
+                            "Tank" -> 'T'
+                            "Archer" -> 'A'
+                            "Berserk" -> 'B'
+                            "Mage" -> 'M'
+                            "Healer" -> 'H'
+                            else -> '?'
+                        }
+                        if (dungeonClass != '?') {
+                            println("[AwesomeMap Debug] Updated class for $name: $dungeonClass")
+                        }
+                    }
+                }
+
                 if (dead) {
                     icon = ""
                 } else {
@@ -208,7 +272,9 @@ object MapUpdate {
                 if (unique == null || unique.name.startsWith("Unknown")) {
                     unique = connected
                         .firstOrNull {
-                            (Dungeon.Info.dungeonList[it.second * 11 + it.first] as? Room)?.uniqueRoom?.name?.startsWith("Unknown") == false
+                            (Dungeon.Info.dungeonList[it.second * 11 + it.first] as? Room)?.uniqueRoom?.name?.startsWith(
+                                "Unknown"
+                            ) == false
                         }?.let {
                             (Dungeon.Info.dungeonList[it.second * 11 + it.first] as? Room)?.uniqueRoom
                         } ?: unique

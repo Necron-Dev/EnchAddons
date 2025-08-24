@@ -15,10 +15,12 @@ interface AwesomeMapConfig : FeatureConfig {
     val playerHeads: Int
     val mapVanillaMarker: Boolean
     val mapVanillaMarkerTeammates: Boolean
+    val mapPlayerHeadColorBorder: Boolean
     val mapClip: Boolean
 
     val textScale: Float
     val vanillaMarkerScale: Float
+    val colorBorderSize: Float
     val playerHeadScale: Float
     val playerNameScale: Float
 

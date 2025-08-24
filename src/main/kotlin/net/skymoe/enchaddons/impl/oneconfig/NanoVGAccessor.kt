@@ -258,4 +258,15 @@ interface NanoVGAccessor {
         vg: Long,
         angle: Double,
     )
+
+    fun drawRoundedRectBorder(
+        vg: Long,
+        x: Double,
+        y: Double,
+        width: Double,
+        height: Double,
+        borderWidth: Double,
+        radius: Double,
+        color: Int,
+    )
 }

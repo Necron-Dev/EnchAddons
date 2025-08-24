@@ -46,6 +46,20 @@ data class AwesomeMapWidget(
     private val config: AwesomeMapConfigImpl,
     private val mapAlpha: Double = 1.0,
 ) : Widget<AwesomeMapWidget> {
+    
+    /**
+     * Maps dungeon class character to their corresponding color from config
+     */
+    private fun getClassColor(dungeonClass: Char): Int {
+        return when (dungeonClass) {
+            'T' -> config.colorTextTank.rgb  // Tank
+            'A' -> config.colorTextArcher.rgb  // Archer
+            'B' -> config.colorTextBerserk.rgb  // Berserk
+            'M' -> config.colorTextMage.rgb  // Mage
+            'H' -> config.colorTextHealer.rgb  // Healer
+            else -> 0xFF000000.int  // Black for unknown/failed detection
+        }
+    }
     override fun draw(context: NanoVGUIContext) {
         val realScale = mapScale
         context.run {
@@ -446,8 +460,25 @@ data class AwesomeMapWidget(
                     ttr size 0.0,
                 )
             } else {
-//                // Render black border around the player head
-//                renderRectBorder(-6.0, -6.0, 12.0, 12.0, 1.0, Color(0, 0, 0, 255))
+                // Draw colored border based on dungeon class when enabled
+                if (config.mapPlayerHeadColorBorder && !config.mapVanillaMarkerTeammates) {
+                    // Draw border for teammates (not using vanilla marker)
+                    if (!isLocalPlayer || !config.mapVanillaMarker) {
+                        val borderColor = getClassColor(player.dungeonClass) alphaScale mapAlpha
+                        val borderSize = config.colorBorderSize.double
+                        nvg.drawRoundedRectBorder(
+                            vg,
+                            ttr posX (-6.0 - borderSize / 2),
+                            ttr posY (-6.0 - borderSize / 2),
+                            ttr size (12.0 + borderSize),
+                            ttr size (12.0 + borderSize),
+                            ttr size borderSize,
+                            ttr size config.playerHeadRadius.double,
+                            borderColor,
+                        )
+                    }
+                }
+                
                 if (!config.mapVanillaMarkerTeammates || (player.isPlayer && name == MC.thePlayer.name)) {
                     nvg.drawRoundedPlayerAvatar(
                         vg,

@@ -26,6 +26,9 @@ data class DungeonPlayer(
     /** Minecraft formatting code for the player's name */
     var colorPrefix = 'f'
 
+    /** The player's dungeon class (T, A, B, M, H) */
+    var dungeonClass: Char = '?'
+
     /** The player's name with formatting code */
     val formattedName: String
         get() = "§$colorPrefix$name"

@@ -678,4 +678,31 @@ object NanoVGAccessorImpl : NanoVGAccessor {
     ) {
         nvgRotate(vg, angle.float)
     }
+
+    override fun drawRoundedRectBorder(
+        vg: Long,
+        x: Double,
+        y: Double,
+        width: Double,
+        height: Double,
+        borderWidth: Double,
+        radius: Double,
+        color: Int,
+    ) {
+        withscope {
+            val nvgColor = NVGColor.calloc().using().fill(color)
+            nvgBeginPath(vg)
+            nvgRoundedRect(
+                vg,
+                x.float,
+                y.float,
+                width.float,
+                height.float,
+                radius.float,
+            )
+            nvgStrokeColor(vg, nvgColor)
+            nvgStrokeWidth(vg, borderWidth.float)
+            nvgStroke(vg)
+        }
+    }
 }

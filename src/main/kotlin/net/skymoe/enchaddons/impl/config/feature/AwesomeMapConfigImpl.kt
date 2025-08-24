@@ -129,6 +129,14 @@ class AwesomeMapConfigImpl :
     override var mapVanillaMarkerTeammates = false
 
     @Switch(
+        name = "Head Color Border",
+        description = "Add color border to plaer heads",
+        category = "Map",
+        subcategory = "Tweaks",
+    )
+    override var mapPlayerHeadColorBorder = false
+
+    @Switch(
         name = "Clip Map",
         description = "Clip map which out of the HUD region.",
         category = "Map",
@@ -175,6 +183,16 @@ class AwesomeMapConfigImpl :
         max = 10F,
     )
     var playerHeadRadius = 2.0f
+
+    @Slider(
+        name = "Class Color Border Size",
+        description = "Scale of player heads relative to map size.",
+        category = "Map",
+        subcategory = "Size",
+        min = 0F,
+        max = 2F,
+    )
+    override var colorBorderSize = 1f
 
     @Slider(
         name = "Player Name Scale",
@@ -445,6 +463,46 @@ class AwesomeMapConfigImpl :
         allowAlpha = true,
     )
     var colorCheckMarkFailed = OneColor(255, 255, 255)
+
+    @Color(
+        name = "Archer",
+        category = "Colors",
+        subcategory = "Class",
+        allowAlpha = true,
+    )
+    var colorTextArcher = OneColor(255, 170, 0)
+
+    @Color(
+        name = "Tank",
+        category = "Colors",
+        subcategory = "Class",
+        allowAlpha = true,
+    )
+    var colorTextTank = OneColor(85, 255, 85)
+
+    @Color(
+        name = "Berserk",
+        category = "Colors",
+        subcategory = "Class",
+        allowAlpha = true,
+    )
+    var colorTextBerserk = OneColor(255, 85, 85)
+
+    @Color(
+        name = "Mage",
+        category = "Colors",
+        subcategory = "Class",
+        allowAlpha = true,
+    )
+    var colorTextMage = OneColor(85, 255, 255)
+
+    @Color(
+        name = "Healer",
+        category = "Colors",
+        subcategory = "Class",
+        allowAlpha = true,
+    )
+    var colorTextHealer = OneColor(255, 85, 255)
 
     @Switch(
         name = "Show Score",
