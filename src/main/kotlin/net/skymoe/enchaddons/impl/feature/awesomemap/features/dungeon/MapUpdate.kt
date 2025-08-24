@@ -19,19 +19,6 @@ import net.skymoe.enchaddons.util.math.double
 object MapUpdate {
     var roomAdded = false
 
-    // Regex pattern to match dungeon tab entries
-    // Format: [level] name (class level) or (EMPTY) or (DEAD)
-    private val classPattern = Regex(
-        "(?:\\[\\d+\\] )?" +  // Optional level in brackets
-                "(\\w+)" +              // Player name
-                ".*?\\(" +              // Everything until opening parenthesis
-                "(?:" +
-                "(Archer|Berserk|Healer|Mage|Tank) ([ILXV]+)" +  // Class and level
-                "|EMPTY" +               // Or EMPTY
-                "|DEAD" +                // Or DEAD
-                ")\\)"                   // Closing parenthesis
-    )
-
     fun preloadHeads() {
         val tabEntries = TabList.getDungeonTabList() ?: return
         for (i in listOf(5, 9, 13, 17, 1)) {
@@ -44,7 +31,6 @@ object MapUpdate {
         val tabEntries = TabList.getDungeonTabList() ?: return
         Dungeon.dungeonTeammates.clear()
         var iconNum = 0
-        println("[AwesomeMap Debug] Starting player detection...")
         for (i in listOf(5, 9, 13, 17, 1)) {
             with(tabEntries[i]) {
                 val strippedEntry = StringUtils.stripControlCodes(second)
@@ -68,17 +54,15 @@ object MapUpdate {
                             // Parse class from format like "Mage XL" or "Tank L"
                             val classInfo = parenContent.split(" ")[0]
 
-                            dungeonClass = when (classInfo) {
-                                "Tank" -> 'T'
-                                "Archer" -> 'A'
-                                "Berserk" -> 'B'
-                                "Mage" -> 'M'
-                                "Healer" -> 'H'
-                                else -> {
-                                    println("[AwesomeMap Debug] Unknown class: '$classInfo'")
-                                    '?'
+                            dungeonClass =
+                                when (classInfo) {
+                                    "Tank" -> 'T'
+                                    "Archer" -> 'A'
+                                    "Berserk" -> 'B'
+                                    "Mage" -> 'M'
+                                    "Healer" -> 'H'
+                                    else -> '?'
                                 }
-                            }
                         }
                     }
 
@@ -94,7 +78,6 @@ object MapUpdate {
                 }
             }
         }
-
     }
 
     fun updatePlayers(tabEntries: List<Pair<NetworkPlayerInfo, String>>) {
@@ -114,17 +97,15 @@ object MapUpdate {
                     val parenContent = tabText.substringAfterLast("(").substringBefore(")")
                     if (parenContent != "EMPTY" && parenContent != "DEAD") {
                         val classInfo = parenContent.split(" ")[0]
-                        dungeonClass = when (classInfo) {
-                            "Tank" -> 'T'
-                            "Archer" -> 'A'
-                            "Berserk" -> 'B'
-                            "Mage" -> 'M'
-                            "Healer" -> 'H'
-                            else -> '?'
-                        }
-                        if (dungeonClass != '?') {
-                            println("[AwesomeMap Debug] Updated class for $name: $dungeonClass")
-                        }
+                        dungeonClass =
+                            when (classInfo) {
+                                "Tank" -> 'T'
+                                "Archer" -> 'A'
+                                "Berserk" -> 'B'
+                                "Mage" -> 'M'
+                                "Healer" -> 'H'
+                                else -> '?'
+                            }
                     }
                 }
 
@@ -273,7 +254,7 @@ object MapUpdate {
                     unique = connected
                         .firstOrNull {
                             (Dungeon.Info.dungeonList[it.second * 11 + it.first] as? Room)?.uniqueRoom?.name?.startsWith(
-                                "Unknown"
+                                "Unknown",
                             ) == false
                         }?.let {
                             (Dungeon.Info.dungeonList[it.second * 11 + it.first] as? Room)?.uniqueRoom

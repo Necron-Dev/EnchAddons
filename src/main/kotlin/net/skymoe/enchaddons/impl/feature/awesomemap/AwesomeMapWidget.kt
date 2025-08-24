@@ -37,6 +37,22 @@ import net.skymoe.enchaddons.util.renderPos
 import net.skymoe.enchaddons.util.toStyledSegments
 import kotlin.math.PI
 
+enum class DungeonClass(
+    val code: Char,
+) {
+    TANK('T'),
+    ARCHER('A'),
+    BERSERK('B'),
+    MAGE('M'),
+    HEALER('H'),
+    UNKNOWN('?'),
+    ;
+
+    companion object {
+        fun fromCode(code: Char): DungeonClass = DungeonClass.entries.find { it.code == code } ?: UNKNOWN
+    }
+}
+
 data class AwesomeMapWidget(
     private val cache: NanoVGImageCache,
     private val pos: Vec2D,
@@ -46,20 +62,21 @@ data class AwesomeMapWidget(
     private val config: AwesomeMapConfigImpl,
     private val mapAlpha: Double = 1.0,
 ) : Widget<AwesomeMapWidget> {
-    
     /**
-     * Maps dungeon class character to their corresponding color from config
+     * Maps dungeon class to their corresponding color from config
      */
-    private fun getClassColor(dungeonClass: Char): Int {
-        return when (dungeonClass) {
-            'T' -> config.colorTextTank.rgb  // Tank
-            'A' -> config.colorTextArcher.rgb  // Archer
-            'B' -> config.colorTextBerserk.rgb  // Berserk
-            'M' -> config.colorTextMage.rgb  // Mage
-            'H' -> config.colorTextHealer.rgb  // Healer
-            else -> 0xFF000000.int  // Black for unknown/failed detection
+    private fun getClassColor(dungeonClass: DungeonClass): cc.polyfrost.oneconfig.config.core.OneColor =
+        when (dungeonClass) {
+            DungeonClass.TANK -> config.colorTextTank
+            DungeonClass.ARCHER -> config.colorTextArcher
+            DungeonClass.BERSERK -> config.colorTextBerserk
+            DungeonClass.MAGE -> config.colorTextMage
+            DungeonClass.HEALER -> config.colorTextHealer
+            DungeonClass.UNKNOWN ->
+                cc.polyfrost.oneconfig.config.core
+                    .OneColor(0, 0, 0) // Black for unknown
         }
-    }
+
     override fun draw(context: NanoVGUIContext) {
         val realScale = mapScale
         context.run {
@@ -464,8 +481,8 @@ data class AwesomeMapWidget(
                 if (config.mapPlayerHeadColorBorder && !config.mapVanillaMarkerTeammates) {
                     // Draw border for teammates (not using vanilla marker)
                     if (!isLocalPlayer || !config.mapVanillaMarker) {
-                        val borderColor = getClassColor(player.dungeonClass) alphaScale mapAlpha
-                        val borderSize = config.colorBorderSize.double
+                        val borderColor = getClassColor(DungeonClass.fromCode(player.dungeonClass))
+                        val borderSize = 1.0 // Direct implementation instead of config override
                         nvg.drawRoundedRectBorder(
                             vg,
                             ttr posX (-6.0 - borderSize / 2),
@@ -474,11 +491,11 @@ data class AwesomeMapWidget(
                             ttr size (12.0 + borderSize),
                             ttr size borderSize,
                             ttr size config.playerHeadRadius.double,
-                            borderColor,
+                            borderColor.rgb,
                         )
                     }
                 }
-                
+
                 if (!config.mapVanillaMarkerTeammates || (player.isPlayer && name == MC.thePlayer.name)) {
                     nvg.drawRoundedPlayerAvatar(
                         vg,
