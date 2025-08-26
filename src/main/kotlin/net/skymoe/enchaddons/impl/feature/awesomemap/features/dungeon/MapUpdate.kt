@@ -4,6 +4,7 @@ import net.minecraft.client.network.NetworkPlayerInfo
 import net.minecraft.init.Blocks
 import net.minecraft.util.BlockPos
 import net.minecraft.util.StringUtils
+import net.skymoe.enchaddons.impl.feature.awesomemap.core.DungeonClass
 import net.skymoe.enchaddons.impl.feature.awesomemap.core.DungeonPlayer
 import net.skymoe.enchaddons.impl.feature.awesomemap.core.map.*
 import net.skymoe.enchaddons.impl.feature.awesomemap.utils.MapUtils
@@ -43,7 +44,7 @@ object MapUpdate {
                         .split(" ")[0]
 
                 if (name != "") {
-                    var dungeonClass = '?'
+                    var dungeonClass = DungeonClass.UNKNOWN
 
                     // Look for class info in parentheses
                     if (strippedEntry.contains("(") && strippedEntry.contains(")")) {
@@ -56,12 +57,12 @@ object MapUpdate {
 
                             dungeonClass =
                                 when (classInfo) {
-                                    "Tank" -> 'T'
-                                    "Archer" -> 'A'
-                                    "Berserk" -> 'B'
-                                    "Mage" -> 'M'
-                                    "Healer" -> 'H'
-                                    else -> '?'
+                                    "Tank" -> DungeonClass.TANK
+                                    "Archer" -> DungeonClass.ARCHER
+                                    "Berserk" -> DungeonClass.BERSERK
+                                    "Mage" -> DungeonClass.MAGE
+                                    "Healer" -> DungeonClass.HEALER
+                                    else -> DungeonClass.UNKNOWN
                                 }
                         }
                     }
@@ -93,18 +94,18 @@ object MapUpdate {
                 dead = tabText.contains("(DEAD)")
 
                 // Update class info if it was previously unknown
-                if (dungeonClass == '?' && tabText.contains("(") && tabText.contains(")")) {
+                if (dungeonClass == DungeonClass.UNKNOWN && tabText.contains("(") && tabText.contains(")")) {
                     val parenContent = tabText.substringAfterLast("(").substringBefore(")")
                     if (parenContent != "EMPTY" && parenContent != "DEAD") {
                         val classInfo = parenContent.split(" ")[0]
                         dungeonClass =
                             when (classInfo) {
-                                "Tank" -> 'T'
-                                "Archer" -> 'A'
-                                "Berserk" -> 'B'
-                                "Mage" -> 'M'
-                                "Healer" -> 'H'
-                                else -> '?'
+                                "Tank" -> DungeonClass.TANK
+                                "Archer" -> DungeonClass.ARCHER
+                                "Berserk" -> DungeonClass.BERSERK
+                                "Mage" -> DungeonClass.MAGE
+                                "Healer" -> DungeonClass.HEALER
+                                else -> DungeonClass.UNKNOWN
                             }
                     }
                 }

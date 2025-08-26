@@ -1,6 +1,7 @@
 package net.skymoe.enchaddons.impl.feature.awesomemap
 
 import net.skymoe.enchaddons.impl.config.feature.AwesomeMapConfigImpl
+import net.skymoe.enchaddons.impl.feature.awesomemap.core.DungeonClass
 import net.skymoe.enchaddons.impl.feature.awesomemap.core.DungeonPlayer
 import net.skymoe.enchaddons.impl.feature.awesomemap.core.map.*
 import net.skymoe.enchaddons.impl.feature.awesomemap.features.dungeon.Dungeon
@@ -34,22 +35,6 @@ import net.skymoe.enchaddons.util.partialTicks
 import net.skymoe.enchaddons.util.renderPos
 import net.skymoe.enchaddons.util.toStyledSegments
 import kotlin.math.PI
-
-enum class DungeonClass(
-    val code: Char,
-) {
-    TANK('T'),
-    ARCHER('A'),
-    BERSERK('B'),
-    MAGE('M'),
-    HEALER('H'),
-    UNKNOWN('?'),
-    ;
-
-    companion object {
-        fun fromCode(code: Char): DungeonClass = DungeonClass.entries.find { it.code == code } ?: UNKNOWN
-    }
-}
 
 data class AwesomeMapWidget(
     private val cache: NanoVGImageCache,
@@ -479,7 +464,7 @@ data class AwesomeMapWidget(
                 if (config.mapPlayerHeadColorBorder && !config.mapVanillaMarkerTeammates) {
                     // Draw border for teammates (not using vanilla marker)
                     if (!isLocalPlayer || !config.mapVanillaMarker) {
-                        val borderColor = getClassColor(DungeonClass.fromCode(player.dungeonClass))
+                        val borderColor = getClassColor(player.dungeonClass)
                         val borderSize = config.colorBorderWidth.double
                         nvg.drawRoundedRectBorder(
                             vg,

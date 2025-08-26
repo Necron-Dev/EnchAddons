@@ -10,6 +10,7 @@ import net.skymoe.enchaddons.feature.awesomemap.AwesomeMap
 import net.skymoe.enchaddons.impl.feature.awesomemap.core.map.Room
 import net.skymoe.enchaddons.impl.feature.awesomemap.features.dungeon.Dungeon
 import net.skymoe.enchaddons.impl.feature.awesomemap.utils.APIUtils
+import net.skymoe.enchaddons.impl.feature.awesomemap.core.DungeonClass
 import net.skymoe.enchaddons.impl.feature.awesomemap.utils.Location
 import net.skymoe.enchaddons.impl.feature.awesomemap.utils.MapUtils
 import net.skymoe.enchaddons.impl.feature.awesomemap.utils.Utils
@@ -26,8 +27,8 @@ data class DungeonPlayer(
     /** Minecraft formatting code for the player's name */
     var colorPrefix = 'f'
 
-    /** The player's dungeon class (T, A, B, M, H) */
-    var dungeonClass: Char = '?'
+/** The player's dungeon class */
+    var dungeonClass: DungeonClass = DungeonClass.UNKNOWN
 
     /** The player's name with formatting code */
     val formattedName: String
