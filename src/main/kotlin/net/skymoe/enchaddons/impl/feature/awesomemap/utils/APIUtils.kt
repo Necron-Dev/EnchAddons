@@ -37,6 +37,11 @@ object APIUtils {
                     it.toJsonObject()?.getJsonPrimitive("name")?.asString == "EZPZ"
                 } ?: false
             }
+            val minister = mayor.getJsonObject("minister") ?: return false
+            val ministerName = minister.getJsonPrimitive("name")?.asString
+            if (ministerName == "Paul") {
+                return minister.getJsonObject("perk")?.getJsonPrimitive("name")?.asString == "EZPZ"
+            }
         }
         return false
     }
